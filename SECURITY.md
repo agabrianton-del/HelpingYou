@@ -249,7 +249,7 @@ Si reportas públicamente sin notificarnos:
 4. Puede afectar tu reputación en la comunidad de seguridad
 
 ### ¿Puedo contactar a alguien más?
-Primero, por favor contacta a security@helpingyou.org. Si no recibes respuesta en 14 días, puedes contactar a:
+Primero, por favor contacta a HYSecurity@protonmail.com . Si no recibes respuesta en 14 días, puedes contactar a:
 - GitHub Security Advisory
 - CERT/CC
 - Autoridades locales de protección de datos

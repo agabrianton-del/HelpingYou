@@ -38,7 +38,7 @@ Si descubres una vulnerabilidad de seguridad, **NO la reportes en:**
 Reporta vulnerabilidades de manera responsable enviando un email a:
 
 ```
-📧 security@helpingyou.org
+📧 HYSecurity@protonmail.com
 ```
 
 **O a través de GitHub Security Advisory:**
@@ -229,7 +229,6 @@ Agradecemos a los siguientes investigadores de seguridad por sus reportes respon
 | TBD | [Tú podrías estar aquí] | Por reportar | 🌟 |
 
 ## 10. Preguntas Frecuentes
-
 ### ¿Cuándo recibiré respuesta?
 Responderemos en 24-48 horas. Si no recibes respuesta en 72 horas, intenta contactarnos de nuevo.
 

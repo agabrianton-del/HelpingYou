@@ -1,0 +1,90 @@
+module.exports = {
+  displayName: 'HelpingYou',
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/**/index.ts',
+    '!src/**/__tests__/**',
+    '!src/**/*.test.ts',
+    '!src/**/*.spec.ts',
+  ],
+  coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/.next/'],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
+  testTimeout: 10000,
+  verbose: true,
+  clearMocks: true,
+  resetMocks: true,
+  restoreMocks: true,
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@components/(.*)$': '<rootDir>/src/components/$1',
+    '^@utils/(.*)$': '<rootDir>/src/utils/$1',
+    '^@hooks/(.*)$': '<rootDir>/src/hooks/$1',
+    '^@types/(.*)$': '<rootDir>/src/types/$1',
+    '^@api/(.*)$': '<rootDir>/src/api/$1',
+    '^@services/(.*)$': '<rootDir>/src/services/$1',
+    '^@constants/(.*)$': '<rootDir>/src/constants/$1',
+    '^@middleware/(.*)$': '<rootDir>/src/middleware/$1',
+    '^@database/(.*)$': '<rootDir>/src/database/$1',
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.js',
+  },
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: {
+          jsx: 'react',
+          esModuleInterop: true,
+          allowSyntheticDefaultImports: true,
+        },
+      },
+    ],
+  },
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
+    },
+  },
+  projects: [
+    {
+      displayName: 'backend',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/src/backend/**/?(*.)+(spec|test).ts?(x)'],
+      roots: ['<rootDir>/src/backend'],
+    },
+    {
+      displayName: 'frontend',
+      testEnvironment: 'jsdom',
+      testMatch: ['<rootDir>/src/frontend/**/?(*.)+(spec|test).ts?(x)'],
+      roots: ['<rootDir>/src/frontend'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.frontend.js'],
+    },
+    {
+      displayName: 'mobile',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/src/mobile/**/?(*.)+(spec|test).ts?(x)'],
+      roots: ['<rootDir>/src/mobile'],
+      moduleNameMapper: {
+        '^react-native$': 'react-native-web',
+      },
+    },
+  ],
+  testPathIgnorePatterns: ['/node_modules/', '/.next/', '/dist/', '/build/'],
+  watchPathIgnorePatterns: ['/node_modules/', '/.next/', '/dist/', '/build/'],
+  maxWorkers: '50%',
+};

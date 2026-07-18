@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/agabrianton-del/HelpingYou/discussions
+    about: Para preguntas generales, ideas y conversaciones
+  - name: 📚 Documentation
+    url: https://github.com/agabrianton-del/HelpingYou/blob/main/README.md
+    about: Consulta la documentación disponible
+  - name: 🔒 Security Issues
+    url: https://github.com/agabrianton-del/HelpingYou/security
+    about: Reporta vulnerabilidades de seguridad de forma privada

@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="130" viewBox="0 0 520 130">
+  <defs>
+    <!-- Dark blue background gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"  stop-color="#020c1e"/>
+      <stop offset="50%" stop-color="#041530"/>
+      <stop offset="100%" stop-color="#020c1e"/>
+    </linearGradient>
+
+    <!-- Silver metallic gradient for text fill -->
+    <linearGradient id="silverGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#e8ecf0"/>
+      <stop offset="18%"  stop-color="#c0c8d4"/>
+      <stop offset="38%"  stop-color="#f4f7fa"/>
+      <stop offset="55%"  stop-color="#a8b4c2"/>
+      <stop offset="72%"  stop-color="#d8dfe8"/>
+      <stop offset="88%"  stop-color="#b0bcc8"/>
+      <stop offset="100%" stop-color="#8898aa"/>
+    </linearGradient>
+
+    <!-- Electric blue glow filter for the outline text -->
+    <filter id="blueGlow" x="-8%" y="-20%" width="116%" height="140%">
+      <feGaussianBlur stdDeviation="2.5" result="blur1"/>
+      <feGaussianBlur stdDeviation="5"   result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle inner highlight filter -->
+    <filter id="innerHighlight" x="-2%" y="-10%" width="104%" height="120%">
+      <feGaussianBlur stdDeviation="0.8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Soft ambient glow behind text -->
+    <filter id="ambientGlow" x="-15%" y="-40%" width="130%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Border highlight gradient -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#1e90ff" stop-opacity="0.9"/>
+      <stop offset="40%"  stop-color="#00bfff" stop-opacity="1"/>
+      <stop offset="60%"  stop-color="#1e90ff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0050c8" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- Subtle top sheen on rectangle -->
+    <linearGradient id="sheenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.01"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main background rectangle -->
+  <rect width="520" height="130" rx="10" ry="10" fill="url(#bgGrad)"/>
+
+  <!-- Subtle surface sheen overlay -->
+  <rect width="520" height="130" rx="10" ry="10" fill="url(#sheenGrad)"/>
+
+  <!-- Electric blue border -->
+  <rect x="2" y="2" width="516" height="126" rx="9" ry="9"
+        fill="none"
+        stroke="url(#borderGrad)"
+        stroke-width="2"
+        filter="url(#blueGlow)"/>
+
+  <!-- Inner fine border line -->
+  <rect x="4.5" y="4.5" width="511" height="121" rx="7.5" ry="7.5"
+        fill="none"
+        stroke="#00bfff"
+        stroke-width="0.5"
+        stroke-opacity="0.35"/>
+
+  <!-- Ambient blue glow behind text (color layer) -->
+  <text x="260" y="80"
+        font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="68"
+        font-weight="700"
+        letter-spacing="3"
+        text-anchor="middle"
+        fill="#1a6fff"
+        fill-opacity="0.18"
+        filter="url(#ambientGlow)">HelpingYou</text>
+
+  <!-- Electric blue outline stroke (outer glow layer) -->
+  <text x="260" y="80"
+        font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="68"
+        font-weight="700"
+        letter-spacing="3"
+        text-anchor="middle"
+        fill="none"
+        stroke="#1e90ff"
+        stroke-width="3"
+        stroke-opacity="0.7"
+        filter="url(#blueGlow)">HelpingYou</text>
+
+  <!-- Thin crisp electric blue outline -->
+  <text x="260" y="80"
+        font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="68"
+        font-weight="700"
+        letter-spacing="3"
+        text-anchor="middle"
+        fill="none"
+        stroke="#00d4ff"
+        stroke-width="1"
+        stroke-opacity="0.9">HelpingYou</text>
+
+  <!-- Main silver fill -->
+  <text x="260" y="80"
+        font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="68"
+        font-weight="700"
+        letter-spacing="3"
+        text-anchor="middle"
+        fill="url(#silverGrad)"
+        filter="url(#innerHighlight)">HelpingYou</text>
+
+  <!-- Subtle top highlight stripe on letters -->
+  <text x="260" y="80"
+        font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="68"
+        font-weight="700"
+        letter-spacing="3"
+        text-anchor="middle"
+        fill="#ffffff"
+        fill-opacity="0.12">HelpingYou</text>
+</svg>

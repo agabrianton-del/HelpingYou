@@ -1,0 +1,3 @@
+# Shared Constants
+
+Constantes compartidas

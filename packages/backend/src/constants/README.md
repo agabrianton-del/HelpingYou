@@ -1,0 +1,3 @@
+# Constants
+
+Constantes del backend

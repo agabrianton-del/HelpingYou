@@ -1,0 +1,57 @@
+{
+  "name": "@helpingyou/cli",
+  "version": "0.1.0",
+  "description": "CLI tool for HelpingYou",
+  "bin": {
+    "helpingyou": "dist/cli.js"
+  },
+  "main": "dist/cli.js",
+  "types": "dist/cli.d.ts",
+  "scripts": {
+    "dev": "ts-node src/cli.ts",
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@helpingyou/shared": "*",
+    "commander": "^11.1.0",
+    "chalk": "^5.3.0",
+    "inquirer": "^8.2.5",
+    "ora": "^5.4.1",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "lodash-es": "^4.17.21",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/jest": "^29.5.8",
+    "@types/inquirer": "^8.2.6",
+    "@types/chalk": "^2.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "eslint": "^8.53.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
+    "prettier": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "helpingyou",
+    "cli",
+    "productivity",
+    "task-management"
+  ]
+}

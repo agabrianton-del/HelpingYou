@@ -1,0 +1,189 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: helpingyou-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-helpingyou}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-helpingyou_dev}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - helpingyou-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-helpingyou}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: helpingyou-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - helpingyou-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+
+  # MongoDB (Optional - for logging/analytics)
+  mongodb:
+    image: mongo:7-alpine
+    container_name: helpingyou-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-helpingyou_dev}
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/init.js
+    networks:
+      - helpingyou-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Elasticsearch (Optional - for search)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: helpingyou-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "${ES_PORT:-9200}:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - helpingyou-network
+    healthcheck:
+      test: curl -s http://localhost:9200 >/dev/null || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (Development)
+  backend:
+    build:
+      context: .
+      dockerfile: ./packages/backend/Dockerfile.dev
+    container_name: helpingyou-backend
+    environment:
+      NODE_ENV: development
+      PORT: ${BACKEND_PORT:-3000}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-helpingyou}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_NAME: ${DB_NAME:-helpingyou_dev}
+      REDIS_URL: redis://redis:6379
+      MONGO_URL: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-helpingyou_dev}?authSource=admin
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    volumes:
+      - ./packages/backend/src:/app/packages/backend/src
+      - ./packages/shared/src:/app/packages/shared/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - helpingyou-network
+    command: npm run dev
+
+  # Frontend Web (Development)
+  web:
+    build:
+      context: .
+      dockerfile: ./packages/web/Dockerfile.dev
+    container_name: helpingyou-web
+    environment:
+      VITE_API_URL: http://localhost:3000
+      VITE_WEBSOCKET_URL: ws://localhost:3000
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    volumes:
+      - ./packages/web/src:/app/packages/web/src
+      - ./packages/web/public:/app/packages/web/public
+      - ./packages/shared/src:/app/packages/shared/src
+    depends_on:
+      - backend
+    networks:
+      - helpingyou-network
+    command: npm run dev
+
+  # Mailhog (Email testing)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: helpingyou-mailhog
+    ports:
+      - "${MAILHOG_PORT:-1025}:1025"
+      - "${MAILHOG_UI_PORT:-8025}:8025"
+    networks:
+      - helpingyou-network
+
+  # PgAdmin (PostgreSQL Management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: helpingyou-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@helpingyou.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-password}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      - postgres
+    networks:
+      - helpingyou-network
+
+  # Adminer (Multi-database Management)
+  adminer:
+    image: adminer:latest
+    container_name: helpingyou-adminer
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    depends_on:
+      - postgres
+      - mongodb
+    networks:
+      - helpingyou-network
+
+networks:
+  helpingyou-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  mongo_data:
+    driver: local
+  elasticsearch_data:
+    driver: local

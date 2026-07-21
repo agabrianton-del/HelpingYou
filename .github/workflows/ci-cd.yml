@@ -1,0 +1,469 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ===================================
+  # LINT & FORMAT CHECK
+  # ===================================
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check code format
+        run: npm run format:check
+
+      - name: Type check
+        run: npm run type-check
+
+  # ===================================
+  # UNIT TESTS
+  # ===================================
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: helpingyou
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: helpingyou_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:cov
+        env:
+          TEST_DATABASE_URL: postgresql://helpingyou:password@localhost:5432/helpingyou_test
+          TEST_REDIS_URL: redis://localhost:6379/1
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+
+  # ===================================
+  # INTEGRATION TESTS
+  # ===================================
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: helpingyou
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: helpingyou_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+      mongodb:
+        image: mongo:7-alpine
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: password
+        options: >-
+          --health-cmd echo
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          TEST_DATABASE_URL: postgresql://helpingyou:password@localhost:5432/helpingyou_test
+          TEST_REDIS_URL: redis://localhost:6379/1
+          MONGO_URL: mongodb://admin:password@localhost:27017/helpingyou_test?authSource=admin
+
+  # ===================================
+  # BUILD
+  # ===================================
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build backend
+        run: npm run build --workspace=packages/backend
+
+      - name: Build web
+        run: npm run build --workspace=packages/web
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-${{ matrix.node-version }}
+          path: |
+            packages/backend/dist
+            packages/web/dist
+          retention-days: 5
+
+  # ===================================
+  # SECURITY SCANNING
+  # ===================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'HelpingYou'
+          path: '.'
+          format: 'JSON'
+          args: >
+            --enableExperimental
+            --enable-retired
+
+      - name: Upload OWASP results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: owasp-results
+          path: dependency-check-report.json
+
+  # ===================================
+  # DOCKER BUILD & PUSH
+  # ===================================
+  docker-build:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: [build, security]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./packages/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}-backend
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push web image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./packages/web/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}-web
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ===================================
+  # CODE QUALITY
+  # ===================================
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    needs: [build]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run SonarQube scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=helpingyou
+            -Dsonar.organization=helpingyou
+
+  # ===================================
+  # DEPLOY TO STAGING
+  # ===================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [docker-build, code-quality]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: https://staging.helpingyou.local
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment..."
+          # Add your staging deployment commands here
+
+      - name: Run smoke tests
+        run: npm run test:smoke
+        env:
+          API_URL: https://staging.helpingyou.local/api
+
+      - name: Notify deployment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Deployed to staging environment'
+            })
+
+  # ===================================
+  # DEPLOY TO PRODUCTION
+  # ===================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [docker-build, code-quality]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://helpingyou.app
+    concurrency:
+      group: production-deployment
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production environment..."
+          # Add your production deployment commands here
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: Production deployment
+          draft: false
+          prerelease: false
+
+      - name: Notify deployment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Deployed to production'
+            })
+
+  # ===================================
+  # NOTIFICATIONS
+  # ===================================
+  notify:
+    name: Notify Team
+    runs-on: ubuntu-latest
+    needs: [lint, test, build]
+    if: always()
+
+    steps:
+      - name: Determine status
+        id: status
+        run: |
+          if [ "${{ needs.lint.result }}" == "failure" ] || [ "${{ needs.test.result }}" == "failure" ] || [ "${{ needs.build.result }}" == "failure" ]; then
+            echo "status=failed" >> $GITHUB_OUTPUT
+          else
+            echo "status=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v1.24.0
+        if: always()
+        with:
+          payload: |
+            {
+              "text": "GitHub Action ${{ steps.status.outputs.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*${{ github.repository }}* - ${{ steps.status.outputs.status }}\n*Branch:* ${{ github.ref }}\n*Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

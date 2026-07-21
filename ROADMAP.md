@@ -463,7 +463,7 @@ Queremos que **TÚ** seas parte de este roadmap.
 
 ### ¿Tienes ideas?
 
-- 📧 **Email:** feedback@helpingyou.org
+- 📧 **Email:** HelpingUEnterprise@proton.me
 - 💬 **GitHub Discussions:** [Abre una discusión](https://github.com/agabrianton-del/HelpingYou/discussions)
 - 🐛 **GitHub Issues:** [Reporta una idea](https://github.com/agabrianton-del/HelpingYou/issues)
 - 🐦 **Twitter/X:** [@HelpingYouOrg](https://twitter.com/helpingyouorg)
@@ -495,7 +495,7 @@ Este roadmap **puede cambiar** basado en:
 ## Contacto y Soporte
 
 - 🌐 **Website:** https://helpingyou.org
-- 📧 **Email:** contact@helpingyou.org
+- 📧 **Email:** HelpingUEnterprise@proton.me
 - 🐛 **Issues:** https://github.com/agabrianton-del/HelpingYou/issues
 - 💬 **Discussions:** https://github.com/agabrianton-del/HelpingYou/discussions
 - 🔐 **Security:** https://github.com/agabrianton-del/HelpingYou/security

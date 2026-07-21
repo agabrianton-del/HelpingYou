@@ -338,7 +338,7 @@ En GitHub:
 
 ¿Crees que falta algo en este changelog?
 
-- 📧 Email: changelog@helpingyou.org
+- 📧 Email: HelpingUEnterprise@proton.me
 - 🐛 Issues: [GitHub Issues](https://github.com/agabrianton-del/HelpingYou/issues)
 - 💬 Discussions: [GitHub Discussions](https://github.com/agabrianton-del/HelpingYou/discussions)
 

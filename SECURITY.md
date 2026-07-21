@@ -38,7 +38,7 @@ Si descubres una vulnerabilidad de seguridad, **NO la reportes en:**
 Reporta vulnerabilidades de manera responsable enviando un email a:
 
 ```
-📧 HYSecurity@protonmail.com
+📧 HelpingUEnterprise@proton.me
 ```
 
 **O a través de GitHub Security Advisory:**
@@ -249,7 +249,7 @@ Si reportas públicamente sin notificarnos:
 4. Puede afectar tu reputación en la comunidad de seguridad
 
 ### ¿Puedo contactar a alguien más?
-Primero, por favor contacta a HYSecurity@protonmail.com . Si no recibes respuesta en 14 días, puedes contactar a:
+Primero, por favor contacta a HelpingUEnterprise@proton.me . Si no recibes respuesta en 14 días, puedes contactar a:
 - GitHub Security Advisory
 - CERT/CC
 - Autoridades locales de protección de datos
@@ -258,7 +258,7 @@ Primero, por favor contacta a HYSecurity@protonmail.com . Si no recibes respuest
 
 | Canal | Contacto | Respuesta |
 |-------|----------|-----------|
-| Email | security@helpingyou.org | 24-48h |
+| Email | HelpingUEnterprise@proton.me | 24-48h |
 | GitHub Advisory | [Security tab](https://github.com/agabrianton-del/HelpingYou/security/advisories) | 24-48h |
 | Encriptado (PGP) | Proporciona tu key PGP | 24-48h |
 

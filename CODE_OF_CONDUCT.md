@@ -59,7 +59,7 @@ Esto incluye pero no se limita a:
 
 ## Aplicación
 
-Los casos de comportamiento abusivo, de acoso o inaceptable pueden ser reportados a los líderes de la comunidad responsables de la aplicación en [conduct@helpingyou.org]. Todas las quejas serán revisadas e investigadas de manera rápida y justa.
+Los casos de comportamiento abusivo, de acoso o inaceptable pueden ser reportados a los líderes de la comunidad responsables de la aplicación en [HelpingUEnterprise@proton.me]. Todas las quejas serán revisadas e investigadas de manera rápida y justa.
 
 Todos los líderes de la comunidad están obligados a respetar la privacidad y la seguridad del reportador de cualquier incidente.
 

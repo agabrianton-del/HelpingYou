@@ -1487,7 +1487,7 @@ curl -X POST https://api.helpingyou.org/api/v1/conversations/conv-123/messages \
 
 ¿Necesitas ayuda con la API?
 
-- 📧 **Email:** api-support@helpingyou.org
+- 📧 **Email:** HelpingUEnterprise@proton.me
 - 💬 **Discussions:** https://github.com/agabrianton-del/HelpingYou/discussions
 - 🐛 **Issues:** https://github.com/agabrianton-del/HelpingYou/issues
 - 📚 **Documentación:** https://docs.helpingyou.org

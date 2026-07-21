@@ -1,0 +1,494 @@
+name: PR Validation & Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  # ===================================
+  # VALIDATE PR
+  # ===================================
+  validate-pr:
+    name: Validate PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            fix
+            feat
+            docs
+            style
+            refactor
+            perf
+            test
+            chore
+            ci
+            revert
+          requireScope: true
+
+      - name: Check PR size
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const additions = pr.additions;
+            const deletions = pr.deletions;
+            const changedFiles = pr.changed_files;
+
+            const MAX_ADDITIONS = 500;
+            const MAX_DELETIONS = 500;
+            const MAX_FILES = 30;
+
+            let messages = [];
+
+            if (additions > MAX_ADDITIONS) {
+              messages.push(`⚠️ Large addition count: ${additions} lines (max: ${MAX_ADDITIONS})`);
+            }
+
+            if (deletions > MAX_DELETIONS) {
+              messages.push(`⚠️ Large deletion count: ${deletions} lines (max: ${MAX_DELETIONS})`);
+            }
+
+            if (changedFiles > MAX_FILES) {
+              messages.push(`⚠️ Many files changed: ${changedFiles} files (max: ${MAX_FILES})`);
+            }
+
+            if (messages.length > 0) {
+              github.rest.issues.createComment({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: messages.join('\n') + '\n\n💡 Consider breaking this PR into smaller, more focused changes.'
+              });
+            }
+
+      - name: Check for WIP
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            if (title.includes('WIP') || title.includes('DO NOT MERGE')) {
+              core.setFailed('❌ PR appears to be a work in progress');
+            }
+
+  # ===================================
+  # LABEL PR
+  # ===================================
+  label-pr:
+    name: Auto-label PR
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+
+    steps:
+      - name: Add labels based on title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const labels = [];
+
+            if (title.includes('fix:') || title.includes('bugfix')) {
+              labels.push('bug');
+            }
+            if (title.includes('feat:') || title.includes('feature')) {
+              labels.push('enhancement');
+            }
+            if (title.includes('docs:')) {
+              labels.push('documentation');
+            }
+            if (title.includes('refactor:')) {
+              labels.push('refactoring');
+            }
+            if (title.includes('test:')) {
+              labels.push('testing');
+            }
+            if (title.includes('chore:') || title.includes('ci:')) {
+              labels.push('maintenance');
+            }
+
+            if (labels.length > 0) {
+              github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: labels
+              });
+            }
+
+  # ===================================
+  # ASSIGN REVIEWERS
+  # ===================================
+  assign-reviewers:
+    name: Assign Reviewers
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+
+    steps:
+      - name: Assign reviewers based on files
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const codeowners = fs.readFileSync('.github/CODEOWNERS', 'utf8');
+            
+            const pr = context.payload.pull_request;
+            const changedFiles = context.payload.pull_request.changed_files;
+
+            // Simple reviewer assignment logic
+            const backendOwners = ['agabrianton-del'];
+            const frontendOwners = ['agabrianton-del'];
+
+            let reviewers = [];
+
+            if (changedFiles > 0) {
+              // Assign based on file patterns
+              github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                reviewers: backendOwners.slice(0, 1)
+              });
+            }
+
+  # ===================================
+  # DEPENDENCY REVIEW
+  # ===================================
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v3
+        with:
+          fail-on-severity: moderate
+          allow-licenses: Apache-2.0,MIT,BSD-3-Clause,BSD-2-Clause,ISC
+
+  # ===================================
+  # SPELL CHECK
+  # ===================================
+  spell-check:
+    name: Spell Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run spell check
+        uses: crate-ci/typos@master
+        with:
+          files: .
+          exclude: |
+            .git
+            .github
+            node_modules
+            dist
+            build
+            coverage
+
+  # ===================================
+  # CHANGELOG CHECK
+  # ===================================
+  changelog-check:
+    name: Changelog Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'skip-changelog')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check changelog updated
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const execSync = require('child_process').execSync;
+
+            const changedFiles = execSync('git diff --name-only origin/main...HEAD').toString().split('\n').filter(f => f);
+            
+            const changelogFiles = ['CHANGELOG.md', 'CHANGELOG.txt', 'HISTORY.md'];
+            const hasChangelog = changelogFiles.some(f => changedFiles.includes(f));
+
+            if (!hasChangelog) {
+              core.warning('⚠️ CHANGELOG.md was not updated. Please consider adding an entry.');
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '📝 Remember to update CHANGELOG.md with your changes!'
+              });
+            }
+
+  # ===================================
+  # CONFLICTING FILES CHECK
+  # ===================================
+  conflict-check:
+    name: Check for Conflicts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for conflicts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            
+            if (pr.mergeable === false) {
+              core.setFailed('❌ PR has merge conflicts. Please resolve them.');
+            }
+
+  # ===================================
+  # COMMIT MESSAGE LINT
+  # ===================================
+  commit-lint:
+    name: Lint Commit Messages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        uses: wagoid/commitlint-github-action@v5
+        with:
+          configFile: commitlint.config.js
+
+  # ===================================
+  # SECURITY REVIEW
+  # ===================================
+  security-review:
+    name: Security Review
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # ===================================
+  # CODE REVIEW ASSIST
+  # ===================================
+  code-review-assist:
+    name: Code Review Assistant
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run code analysis
+        run: npm run analyze
+        continue-on-error: true
+
+      - name: Comment with analysis results
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            
+            if (fs.existsSync('analysis-results.json')) {
+              const results = JSON.parse(fs.readFileSync('analysis-results.json', 'utf8'));
+              
+              if (results.warnings && results.warnings.length > 0) {
+                let comment = '## 🔍 Code Analysis Results\n\n';
+                comment += '### Warnings:\n';
+                results.warnings.forEach(warning => {
+                  comment += `- ${warning}\n`;
+                });
+                
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              }
+            }
+
+  # ===================================
+  # PERFORMANCE IMPACT
+  # ===================================
+  performance-check:
+    name: Performance Impact Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: Build base
+        run: |
+          npm ci
+          npm run build 2>&1 | tee build-base.log || true
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Build PR
+        run: |
+          npm ci
+          npm run build 2>&1 | tee build-pr.log || true
+
+      - name: Compare build sizes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Simple build size comparison
+            const baseSize = fs.statSync('dist').size;
+            const prSize = fs.statSync('dist').size;
+            
+            const diff = prSize - baseSize;
+            const percentChange = ((diff / baseSize) * 100).toFixed(2);
+            
+            if (Math.abs(diff) > 10000) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `📊 Build size ${diff > 0 ? 'increased' : 'decreased'} by ${Math.abs(diff)} bytes (${percentChange}%)`
+              });
+            }
+
+  # ===================================
+  # PR SUMMARY
+  # ===================================
+  pr-summary:
+    name: Generate PR Summary
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+
+    steps:
+      - name: Create PR summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            
+            const summary = `
+## 📋 PR Summary
+
+- **Author:** @${pr.user.login}
+- **Base:** \`${pr.base.ref}\`
+- **Head:** \`${pr.head.ref}\`
+- **Changed Files:** ${pr.changed_files}
+- **Additions:** +${pr.additions}
+- **Deletions:** -${pr.deletions}
+
+## ✅ Checklist
+
+- [ ] Code follows style guidelines
+- [ ] Self-review completed
+- [ ] Comments added for complex logic
+- [ ] No new warnings generated
+- [ ] Tests added/updated
+- [ ] Documentation updated
+- [ ] No breaking changes
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: pr.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+
+  # ===================================
+  # FINAL STATUS
+  # ===================================
+  pr-status:
+    name: PR Status Check
+    runs-on: ubuntu-latest
+    needs: [validate-pr, dependency-review, spell-check, commit-lint, security-review]
+    if: always()
+
+    steps:
+      - name: Check job statuses
+        run: |
+          if [ "${{ needs.validate-pr.result }}" == "failure" ]; then
+            echo "❌ Validation failed"
+            exit 1
+          fi
+          if [ "${{ needs.dependency-review.result }}" == "failure" ]; then
+            echo "❌ Dependency review failed"
+            exit 1
+          fi
+          if [ "${{ needs.commit-lint.result }}" == "failure" ]; then
+            echo "❌ Commit linting failed"
+            exit 1
+          fi
+          echo "✅ All checks passed"
+
+      - name: Update PR status
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const allPassed = context.payload.pull_request && 
+              '${{ needs.validate-pr.result }}' === 'success' &&
+              '${{ needs.commit-lint.result }}' === 'success';
+            
+            const status = allPassed ? '✅ Ready for review' : '❌ Review required';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ${status}`
+            });

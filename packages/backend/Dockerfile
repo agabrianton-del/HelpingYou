@@ -25,16 +25,20 @@ RUN apk add --no-cache dumb-init && \
     addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+# Install production dependencies only to keep the image lean
+COPY --chown=nodejs:nodejs package*.json ./
+COPY --chown=nodejs:nodejs packages/backend/package*.json ./packages/backend/
+COPY --chown=nodejs:nodejs packages/shared/package*.json ./packages/shared/
+RUN npm ci --omit=dev
+
 COPY --from=builder --chown=nodejs:nodejs /app/packages/shared ./packages/shared
 COPY --from=builder --chown=nodejs:nodejs /app/packages/backend/dist ./packages/backend/dist
-COPY --from=builder --chown=nodejs:nodejs /app/packages/backend/package*.json ./packages/backend/
 
 USER nodejs
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => { if (r.statusCode !== 200) throw new Error(r.statusCode) })"
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => { if (r.statusCode !== 200) throw new Error(r.statusCode) }).on('error', (e) => { throw e })"
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "packages/backend/dist/server.js"]

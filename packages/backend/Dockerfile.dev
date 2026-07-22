@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy workspace manifests to leverage Docker layer caching
+COPY package*.json ./
+COPY packages/backend/package*.json ./packages/backend/
+COPY packages/shared/package*.json ./packages/shared/
+
+# Install all workspace dependencies
+RUN npm ci
+
+# Copy source code (overridden by volume mounts in docker-compose)
+COPY tsconfig.json ./
+COPY packages/shared/ ./packages/shared/
+COPY packages/backend/ ./packages/backend/
+
+WORKDIR /app/packages/backend
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

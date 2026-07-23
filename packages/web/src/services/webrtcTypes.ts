@@ -34,7 +34,7 @@ export interface IceServerConfig {
 }
 
 export interface IWebRTCProvider {
-  initialise(config: WebRTCProviderConfig): Promise<void>;
+  initialize(config: WebRTCProviderConfig): Promise<void>;
   createOffer(): Promise<void>;
   handleOffer(sdp: RTCSessionDescriptionInit): Promise<void>;
   handleAnswer(sdp: RTCSessionDescriptionInit): Promise<void>;

@@ -113,8 +113,8 @@ export interface SignalingErrorPayload {
 // ---------------------------------------------------------------------------
 
 export interface IWebRTCProvider {
-  /** Set up local media tracks and initialise the peer connection. */
-  initialise(config: WebRTCProviderConfig): Promise<void>;
+  /** Set up local media tracks and initialize the peer connection. */
+  initialize(config: WebRTCProviderConfig): Promise<void>;
 
   /** Create an SDP offer and send it via the signaling channel. */
   createOffer(): Promise<void>;

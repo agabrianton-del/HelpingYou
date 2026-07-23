@@ -21,7 +21,7 @@ const SIGNALING_URL = import.meta.env.VITE_SIGNALING_URL ?? 'http://localhost:30
  * Design:
  *  - Implements IWebRTCProvider so it can be swapped for an SFU-backed
  *    provider (LiveKit, mediasoup, Janus) without caller changes.
- *  - All media / ICE state flows through callbacks supplied at initialise().
+ *  - All media / ICE state flows through callbacks supplied at initialize().
  */
 export class WebRTCService implements IWebRTCProvider {
   private pc: RTCPeerConnection | null = null;
@@ -43,7 +43,7 @@ export class WebRTCService implements IWebRTCProvider {
   // IWebRTCProvider
   // -------------------------------------------------------------------------
 
-  async initialise(config: WebRTCProviderConfig): Promise<void> {
+  async initialize(config: WebRTCProviderConfig): Promise<void> {
     this.config = config;
 
     // Acquire local media
@@ -85,14 +85,14 @@ export class WebRTCService implements IWebRTCProvider {
   }
 
   async createOffer(): Promise<void> {
-    if (!this.pc) throw new Error('WebRTCService not initialised');
+    if (!this.pc) throw new Error('WebRTCService not initialized');
 
     const offer = await this.pc.createOffer();
     await this.pc.setLocalDescription(offer);
   }
 
   async handleOffer(sdp: RTCSessionDescriptionInit): Promise<void> {
-    if (!this.pc) throw new Error('WebRTCService not initialised');
+    if (!this.pc) throw new Error('WebRTCService not initialized');
 
     await this.pc.setRemoteDescription(new RTCSessionDescription(sdp));
     const answer = await this.pc.createAnswer();
@@ -100,13 +100,13 @@ export class WebRTCService implements IWebRTCProvider {
   }
 
   async handleAnswer(sdp: RTCSessionDescriptionInit): Promise<void> {
-    if (!this.pc) throw new Error('WebRTCService not initialised');
+    if (!this.pc) throw new Error('WebRTCService not initialized');
 
     await this.pc.setRemoteDescription(new RTCSessionDescription(sdp));
   }
 
   async addIceCandidate(candidate: RTCIceCandidateInit): Promise<void> {
-    if (!this.pc) throw new Error('WebRTCService not initialised');
+    if (!this.pc) throw new Error('WebRTCService not initialized');
 
     await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
   }

@@ -74,12 +74,12 @@ export function useWebRTC({ callType = 'video' }: UseWebRTCOptions = {}): UseWeb
   }, [sessionId]);
 
   // -------------------------------------------------------------------------
-  // initialise the WebRTC peer connection
+  // initialize the WebRTC peer connection
   // -------------------------------------------------------------------------
-  const initialisePeerConnection = useCallback(
+  const initializePeerConnection = useCallback(
     async (iceServers: IceServerConfig[]) => {
       const svc = serviceRef.current;
-      await svc.initialise({
+      await svc.initialize({
         callType,
         iceServers,
         onIceCandidate: (candidate) => {
@@ -131,7 +131,7 @@ export function useWebRTC({ callType = 'video' }: UseWebRTCOptions = {}): UseWeb
         setSessionId(newSessionId);
         setSessionState('waiting');
 
-        await initialisePeerConnection(iceServersRef.current);
+        await initializePeerConnection(iceServersRef.current);
 
         const svc = serviceRef.current;
         svc.connectSignaling(newSessionId, userId, {
@@ -148,7 +148,7 @@ export function useWebRTC({ callType = 'video' }: UseWebRTCOptions = {}): UseWeb
         setError(err instanceof Error ? err.message : 'Unknown error');
       }
     },
-    [callType, initialisePeerConnection]
+    [callType, initializePeerConnection]
   );
 
   // -------------------------------------------------------------------------
@@ -174,7 +174,7 @@ export function useWebRTC({ callType = 'video' }: UseWebRTCOptions = {}): UseWeb
         setSessionId(targetSessionId);
         setSessionState('connecting');
 
-        await initialisePeerConnection(iceServersRef.current);
+        await initializePeerConnection(iceServersRef.current);
 
         const svc = serviceRef.current;
         svc.connectSignaling(targetSessionId, userId, {
@@ -189,7 +189,7 @@ export function useWebRTC({ callType = 'video' }: UseWebRTCOptions = {}): UseWeb
         setError(err instanceof Error ? err.message : 'Unknown error');
       }
     },
-    [initialisePeerConnection]
+    [initializePeerConnection]
   );
 
   // -------------------------------------------------------------------------

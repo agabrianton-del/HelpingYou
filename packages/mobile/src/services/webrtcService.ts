@@ -49,7 +49,7 @@ export class MobileWebRTCService implements IWebRTCProvider {
   // IWebRTCProvider
   // -------------------------------------------------------------------------
 
-  async initialise(config: WebRTCProviderConfig): Promise<void> {
+  async initialize(config: WebRTCProviderConfig): Promise<void> {
     this.config = config;
 
     // Acquire local media using react-native-webrtc's mediaDevices API
@@ -96,7 +96,7 @@ export class MobileWebRTCService implements IWebRTCProvider {
   }
 
   async createOffer(): Promise<void> {
-    if (!this.pc) throw new Error('MobileWebRTCService not initialised');
+    if (!this.pc) throw new Error('MobileWebRTCService not initialized');
 
     const offer = await this.pc.createOffer({
       offerToReceiveAudio: true,
@@ -106,7 +106,7 @@ export class MobileWebRTCService implements IWebRTCProvider {
   }
 
   async handleOffer(sdp: RTCSessionDescriptionInit): Promise<void> {
-    if (!this.pc) throw new Error('MobileWebRTCService not initialised');
+    if (!this.pc) throw new Error('MobileWebRTCService not initialized');
 
     await this.pc.setRemoteDescription(new RTCSessionDescription(sdp));
     const answer = await this.pc.createAnswer();
@@ -114,13 +114,13 @@ export class MobileWebRTCService implements IWebRTCProvider {
   }
 
   async handleAnswer(sdp: RTCSessionDescriptionInit): Promise<void> {
-    if (!this.pc) throw new Error('MobileWebRTCService not initialised');
+    if (!this.pc) throw new Error('MobileWebRTCService not initialized');
 
     await this.pc.setRemoteDescription(new RTCSessionDescription(sdp));
   }
 
   async addIceCandidate(candidate: RTCIceCandidateInit): Promise<void> {
-    if (!this.pc) throw new Error('MobileWebRTCService not initialised');
+    if (!this.pc) throw new Error('MobileWebRTCService not initialized');
 
     await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
   }

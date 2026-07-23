@@ -56,10 +56,10 @@ export function useWebRTC({ callType = 'video' }: UseWebRTCOptions = {}): UseWeb
     };
   }, [sessionId]);
 
-  const initialisePeerConnection = useCallback(
+  const initializePeerConnection = useCallback(
     async (iceServers: IceServerConfig[]) => {
       const svc = serviceRef.current;
-      await svc.initialise({
+      await svc.initialize({
         callType,
         iceServers,
         onIceCandidate: (candidate) => {
@@ -108,7 +108,7 @@ export function useWebRTC({ callType = 'video' }: UseWebRTCOptions = {}): UseWeb
         setSessionId(newSessionId);
         setSessionState('waiting');
 
-        await initialisePeerConnection(iceServersRef.current);
+        await initializePeerConnection(iceServersRef.current);
 
         const svc = serviceRef.current;
         svc.connectSignaling(newSessionId, userId, {
@@ -125,7 +125,7 @@ export function useWebRTC({ callType = 'video' }: UseWebRTCOptions = {}): UseWeb
         setError(err instanceof Error ? err.message : 'Unknown error');
       }
     },
-    [callType, initialisePeerConnection]
+    [callType, initializePeerConnection]
   );
 
   const joinSession = useCallback(
@@ -148,7 +148,7 @@ export function useWebRTC({ callType = 'video' }: UseWebRTCOptions = {}): UseWeb
         setSessionId(targetSessionId);
         setSessionState('connecting');
 
-        await initialisePeerConnection(iceServersRef.current);
+        await initializePeerConnection(iceServersRef.current);
 
         const svc = serviceRef.current;
         svc.connectSignaling(targetSessionId, userId, {
@@ -161,7 +161,7 @@ export function useWebRTC({ callType = 'video' }: UseWebRTCOptions = {}): UseWeb
         setError(err instanceof Error ? err.message : 'Unknown error');
       }
     },
-    [initialisePeerConnection]
+    [initializePeerConnection]
   );
 
   const leaveSession = useCallback(async () => {

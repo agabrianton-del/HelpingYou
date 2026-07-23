@@ -12,6 +12,8 @@ dotenv.config();
 // Import routes and middleware
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/logger';
+import { SignalingService } from './services/signalingService';
+import callRoutes from './routes/callRoutes';
 
 class AppServer {
   private app: Express;
@@ -73,7 +75,10 @@ class AppServer {
   }
 
   private initializeRoutes(): void {
-    // API routes will be added here
+    // Call / WebRTC session management
+    this.app.use('/api/v1/calls', callRoutes);
+
+    // API root
     this.app.get('/api', (req: ExpressRequest, res: ExpressResponse) => {
       res.status(200).json({
         message: 'Welcome to HelpingYou API',
@@ -92,15 +97,8 @@ class AppServer {
   }
 
   private initializeSocketIO(): void {
-    this.io.on('connection', (socket) => {
-      console.log(`New client connected: ${socket.id}`);
-
-      socket.on('disconnect', () => {
-        console.log(`Client disconnected: ${socket.id}`);
-      });
-
-      // Add more socket events here
-    });
+    const signalingService = new SignalingService(this.io);
+    signalingService.registerHandlers();
   }
 
   public start(): void {

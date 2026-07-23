@@ -194,24 +194,24 @@ jobs:
             const pr = context.payload.pull_request;
             
             const summary = `
-## 📋 PR Summary
+            ## 📋 PR Summary
 
-- **Author:** @${pr.user.login}
-- **Base:** \`${pr.base.ref}\`
-- **Head:** \`${pr.head.ref}\`
-- **Changed Files:** ${pr.changed_files}
-- **Additions:** +${pr.additions}
-- **Deletions:** -${pr.deletions}
+            - **Author:** @${pr.user.login}
+            - **Base:** \`${pr.base.ref}\`
+            - **Head:** \`${pr.head.ref}\`
+            - **Changed Files:** ${pr.changed_files}
+            - **Additions:** +${pr.additions}
+            - **Deletions:** -${pr.deletions}
 
-## ✅ Checklist
+            ## ✅ Checklist
 
-- [ ] Code follows style guidelines
-- [ ] Self-review completed
-- [ ] Comments added for complex logic
-- [ ] No new warnings generated
-- [ ] Tests added/updated
-- [ ] Documentation updated
-- [ ] No breaking changes
+            - [ ] Code follows style guidelines
+            - [ ] Self-review completed
+            - [ ] Comments added for complex logic
+            - [ ] No new warnings generated
+            - [ ] Tests added/updated
+            - [ ] Documentation updated
+            - [ ] No breaking changes
             `;
             
             github.rest.issues.createComment({

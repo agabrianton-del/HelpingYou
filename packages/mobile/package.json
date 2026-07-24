@@ -42,7 +42,9 @@
     "lodash-es": "^4.17.21",
     "native-base": "^3.4.28",
     "expo-font": "^11.4.0",
-    "expo-splash-screen": "^0.26.4"
+    "expo-splash-screen": "^0.26.4",
+    "react-native-webrtc": "^118.0.0",
+    "socket.io-client": "^4.7.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",

@@ -11,8 +11,17 @@ import type {
 } from '../types/streaming';
 
 /**
- * RtmpService manages the node-media-server lifecycle and keeps the in-memory
- * broadcast registry in sync with real RTMP publish/play events.
+ * Minimal representation of a node-media-server session object passed to
+ * event callbacks.  The full type from the library is CJS-only and has no
+ * DefinitelyTyped equivalent for v4, so we declare exactly the properties
+ * the service needs.
+ */
+interface NmsSession {
+  /** Stream path e.g. '/live/<streamKey>' */
+  streamPath: string;
+  /** Reject the incoming connection (publisher only). */
+  reject?: () => void;
+}
  *
  * Architecture:
  *   - Broadcasters push via RTMP:  rtmp://host:<RTMP_PORT>/live/<streamKey>
@@ -52,7 +61,7 @@ export class RtmpService {
 
   public start(): void {
     this.nms = new NodeMediaServer({
-      logType: 1, // 0 = none, 1 = error, 2 = normal, 3 = debug
+      logType: 1, // 0 = none, 1 = normal, 2 = debug, 3 = verbose
       rtmp: {
         port: this.rtmpPort,
         chunk_size: 60000,
@@ -164,7 +173,7 @@ export class RtmpService {
      * session.streamPath = '/live/<streamKey>'
      * Reject unknown stream keys to prevent unauthorized publishing.
      */
-    this.nms.on('prePublish', (session: any) => {
+    this.nms.on('prePublish', (session: NmsSession) => {
       const streamKey = this.extractStreamKey(session.streamPath as string);
       const broadcastId = this.keyToBroadcastId.get(streamKey);
 
@@ -187,7 +196,7 @@ export class RtmpService {
     /**
      * postPublish fires once RTMP negotiation succeeds and data starts flowing.
      */
-    this.nms.on('postPublish', (session: any) => {
+    this.nms.on('postPublish', (session: NmsSession) => {
       const streamKey = this.extractStreamKey(session.streamPath as string);
       const broadcastId = this.keyToBroadcastId.get(streamKey);
       if (!broadcastId) return;
@@ -212,7 +221,7 @@ export class RtmpService {
     /**
      * donePublish fires when the broadcaster's RTMP connection closes.
      */
-    this.nms.on('donePublish', (session: any) => {
+    this.nms.on('donePublish', (session: NmsSession) => {
       const streamKey = this.extractStreamKey(session.streamPath as string);
       const broadcastId = this.keyToBroadcastId.get(streamKey);
       if (!broadcastId) return;
@@ -223,12 +232,12 @@ export class RtmpService {
     /**
      * postPlay / donePlay update the viewer count for the broadcast room.
      */
-    this.nms.on('postPlay', (session: any) => {
+    this.nms.on('postPlay', (session: NmsSession) => {
       const streamKey = this.extractStreamKey(session.streamPath as string);
       this.incrementViewerCount(streamKey, +1);
     });
 
-    this.nms.on('donePlay', (session: any) => {
+    this.nms.on('donePlay', (session: NmsSession) => {
       const streamKey = this.extractStreamKey(session.streamPath as string);
       this.incrementViewerCount(streamKey, -1);
     });

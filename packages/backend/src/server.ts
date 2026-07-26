@@ -12,6 +12,10 @@ dotenv.config();
 // Import routes and middleware
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/logger';
+import { SignalingService } from './services/signalingService';
+import { RtmpService } from './services/rtmpService';
+import { createStreamRouter } from './routes/streamRoutes';
+import callRoutes from './routes/callRoutes';
 
 class AppServer {
   private app: Express;
@@ -19,6 +23,7 @@ class AppServer {
   private io: SocketIOServer;
   private port: number;
   private env: string;
+  private rtmpService: RtmpService | null = null;
 
   constructor() {
     this.port = parseInt(process.env.PORT || '3000', 10);
@@ -73,7 +78,14 @@ class AppServer {
   }
 
   private initializeRoutes(): void {
-    // API routes will be added here
+    // Call / WebRTC session management
+    this.app.use('/api/v1/calls', callRoutes);
+
+    // Live streaming (RTMP broadcasts)
+    this.rtmpService = new RtmpService(this.io);
+    this.app.use('/api/v1/streams', createStreamRouter(this.rtmpService));
+
+    // API root
     this.app.get('/api', (req: ExpressRequest, res: ExpressResponse) => {
       res.status(200).json({
         message: 'Welcome to HelpingYou API',
@@ -92,19 +104,16 @@ class AppServer {
   }
 
   private initializeSocketIO(): void {
-    this.io.on('connection', (socket) => {
-      console.log(`New client connected: ${socket.id}`);
-
-      socket.on('disconnect', () => {
-        console.log(`Client disconnected: ${socket.id}`);
-      });
-
-      // Add more socket events here
-    });
+    const signalingService = new SignalingService(this.io);
+    signalingService.registerHandlers();
   }
 
   public start(): void {
     this.initializeSocketIO();
+
+    if (process.env.RTMP_ENABLED !== 'false') {
+      this.rtmpService?.start();
+    }
 
     this.server.listen(this.port, () => {
       console.log(`🚀 Server is running on port ${this.port}`);
@@ -123,6 +132,10 @@ class AppServer {
 
   public getServer(): ReturnType<typeof createServer> {
     return this.server;
+  }
+
+  public getRtmpService(): RtmpService | null {
+    return this.rtmpService;
   }
 }
 

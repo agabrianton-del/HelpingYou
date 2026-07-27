@@ -41,7 +41,7 @@ services:
 
   # MongoDB (Optional - for logging/analytics)
   mongodb:
-    image: mongo:7-alpine
+    image: mongo:7
     container_name: helpingyou-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}

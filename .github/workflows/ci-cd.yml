@@ -146,7 +146,7 @@ jobs:
           - 6379:6379
 
       mongodb:
-        image: mongo:7-alpine
+        image: mongo:7
         env:
           MONGO_INITDB_ROOT_USERNAME: admin
           MONGO_INITDB_ROOT_PASSWORD: password

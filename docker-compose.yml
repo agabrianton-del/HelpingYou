@@ -153,7 +153,7 @@ services:
     image: dpage/pgadmin4:latest
     container_name: helpingyou-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-HelpingUEnterprise@proton.me}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-password}
     ports:
       - "${PGADMIN_PORT:-5050}:80"

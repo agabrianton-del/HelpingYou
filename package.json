@@ -21,11 +21,7 @@
     "helpingyou"
   ],
   "workspaces": [
-    "packages/backend",
-    "packages/web",
-    "packages/mobile",
-    "packages/shared",
-    "packages/cli"
+    "packages/*"
   ],
   "scripts": {
     "dev": "lerna run dev --parallel",

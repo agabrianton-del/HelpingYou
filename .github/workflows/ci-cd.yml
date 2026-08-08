@@ -230,7 +230,7 @@ jobs:
 
       - name: Run Snyk security scan
         continue-on-error: true
-        uses: snyk/actions/node@v4
+        uses: snyk/actions/node@v1
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:

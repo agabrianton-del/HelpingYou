@@ -228,9 +228,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Snyk security scan
+      - name: Run Snyk to check for vulnerabilities
         continue-on-error: true
-        uses: snyk/actions/node@v4
+        uses: snyk/actions/node@v1
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:

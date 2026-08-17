@@ -242,16 +242,17 @@ jobs:
           project: 'HelpingYou'
           path: '.'
           format: 'JSON'
+          out: 'reports'
           args: >
             --enableExperimental
-            --enable-retired
+            --enableRetired
 
       - name: Upload OWASP results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: owasp-results
-          path: dependency-check-report.json
+          path: reports
 
   # ===================================
   # DOCKER BUILD & PUSH

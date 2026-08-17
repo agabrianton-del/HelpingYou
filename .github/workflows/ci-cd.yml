@@ -242,9 +242,10 @@ jobs:
           project: 'HelpingYou'
           path: '.'
           format: 'JSON'
+          out: 'reports'
           args: >
             --enableExperimental
-            --enable-retired
+            --enableRetired
 
       - name: Upload OWASP results
         if: always()

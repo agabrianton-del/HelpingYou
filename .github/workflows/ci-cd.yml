@@ -252,7 +252,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: owasp-results
-          path: dependency-check-report.json
+          path: reports
 
   # ===================================
   # DOCKER BUILD & PUSH

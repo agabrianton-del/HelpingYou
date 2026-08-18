@@ -4,6 +4,7 @@
   "parserOptions": {
     "ecmaVersion": 2022,
     "sourceType": "module",
+    "project": ["./tsconfig.eslint.json"],
     "ecmaFeatures": {
       "jsx": true
     }
@@ -47,7 +48,7 @@
         "arrowParens": "always"
       }
     ],
-    "@typescript-eslint/explicit-function-return-types": [
+    "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
         "allowExpressions": true,
@@ -144,6 +145,10 @@
     "react-native/no-unused-styles": "error"
   },
   "overrides": [
+    {
+      "files": ["*.js", "*.jsx"],
+      "extends": ["plugin:@typescript-eslint/disable-type-checked"]
+    },
     {
       "files": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx"],
       "env": {

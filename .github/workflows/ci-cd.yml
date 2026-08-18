@@ -244,7 +244,6 @@ jobs:
           format: 'JSON'
           args: >
             --enableExperimental
-            --enable-retired
 
       - name: Upload OWASP results
         if: always()

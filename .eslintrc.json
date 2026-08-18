@@ -145,6 +145,10 @@
   },
   "overrides": [
     {
+      "files": ["*.js", "*.jsx"],
+      "extends": ["plugin:@typescript-eslint/disable-type-checked"]
+    },
+    {
       "files": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx"],
       "env": {
         "jest": true

@@ -134,6 +134,10 @@ services:
       - ./packages/shared/src:/app/packages/shared/src
     depends_on:
       - backend
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     networks:
       - helpingyou-network
     command: npm run dev -- --host

@@ -39,6 +39,7 @@
     "test": "lerna run test --parallel",
     "test:watch": "lerna run test:watch --parallel",
     "test:coverage": "lerna run test:coverage --parallel",
+    "test:cov": "lerna run test:coverage --parallel",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",

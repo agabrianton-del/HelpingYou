@@ -146,6 +146,13 @@
   },
   "overrides": [
     {
+      "files": ["__mocks__/**/*.js", "*.config.js", ".eslintrc.js"],
+      "parserOptions": {
+        "project": null
+      },
+      "extends": ["eslint:recommended"]
+    },
+    {
       "files": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx"],
       "env": {
         "jest": true

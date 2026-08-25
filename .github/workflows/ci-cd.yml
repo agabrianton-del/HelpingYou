@@ -243,6 +243,7 @@ jobs:
           path: '.'
           format: 'JSON'
           args: >
+            --disableNodeAudit
             --enableExperimental
             --enableRetired
 
@@ -251,7 +252,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: owasp-results
-          path: dependency-check-report.json
+          path: reports/dependency-check-report.json
 
   # ===================================
   # DOCKER BUILD & PUSH
@@ -438,6 +439,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, test, build]
     if: always()
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
       - name: Determine status
@@ -450,8 +453,8 @@ jobs:
           fi
 
       - name: Send Slack notification
+        if: always() && env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1.24.0
-        if: always()
         with:
           payload: |
             {

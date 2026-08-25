@@ -4,7 +4,7 @@
   "parserOptions": {
     "ecmaVersion": 2022,
     "sourceType": "module",
-    "project": "./tsconfig.json",
+    "project": "./tsconfig.eslint.json",
     "ecmaFeatures": {
       "jsx": true
     }
@@ -48,7 +48,7 @@
         "arrowParens": "always"
       }
     ],
-    "@typescript-eslint/explicit-function-return-types": [
+    "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
         "allowExpressions": true,
@@ -146,11 +146,11 @@
   },
   "overrides": [
     {
-      "files": ["__mocks__/**/*.js", "*.config.js", ".eslintrc.js"],
-      "parserOptions": {
-        "project": null
-      },
-      "extends": ["eslint:recommended"]
+      "files": ["**/*.js", "**/*.jsx"],
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/disable-type-checked"
+      ]
     },
     {
       "files": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx"],

@@ -242,6 +242,7 @@ jobs:
           project: 'HelpingYou'
           path: '.'
           format: 'JSON'
+          out: 'reports'
           args: >
             --enableExperimental
             --enableRetired
@@ -251,7 +252,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: owasp-results
-          path: dependency-check-report.json
+          path: ${{ github.workspace }}/reports
 
   # ===================================
   # DOCKER BUILD & PUSH

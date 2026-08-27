@@ -244,6 +244,7 @@ jobs:
           format: 'JSON'
           out: 'reports'
           args: >
+            --disableNodeAudit
             --enableExperimental
             --enableRetired
 

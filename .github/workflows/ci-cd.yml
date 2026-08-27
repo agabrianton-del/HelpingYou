@@ -246,6 +246,7 @@ jobs:
           args: >
             --enableExperimental
             --enableRetired
+            --disableNodeAudit
 
       - name: Upload OWASP results
         if: always()

@@ -3,6 +3,7 @@
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2022,
+    "project": ["./tsconfig.eslint.json"],
     "sourceType": "module",
     "project": "./tsconfig.json",
     "ecmaFeatures": {
@@ -48,7 +49,7 @@
         "arrowParens": "always"
       }
     ],
-    "@typescript-eslint/explicit-function-return-types": [
+    "@typescript-eslint/explicit-function-return-type": [
       "error",
       {
         "allowExpressions": true,

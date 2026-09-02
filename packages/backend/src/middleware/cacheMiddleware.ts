@@ -8,9 +8,12 @@ interface CacheOptions {
   tags?: string[];
   methods?: string[]; // HTTP methods to cache (default: GET)
   skipIf?: (req: Request) => boolean; // Condition to skip caching
+  visibility?: 'private' | 'public';
 }
 
 const logger = new Logger('CacheMiddleware');
+
+const CACHE_VARY_HEADERS = ['Authorization', 'Cookie'] as const;
 
 /**
  * Generate cache key from request
@@ -26,6 +29,40 @@ function generateCacheKey(req: Request): string {
   const hash = crypto.createHash('sha256').update(fullPath).digest('hex');
 
   return `http-cache:${hash}`;
+}
+
+function hasSensitiveRequestContext(req: Request): boolean {
+  const hasAuthorizationHeader = typeof req.headers.authorization === 'string';
+  const hasCookieHeader = typeof req.headers.cookie === 'string' && req.headers.cookie.length > 0;
+  const user = (req as Request & { user?: unknown }).user;
+
+  return hasAuthorizationHeader || hasCookieHeader || Boolean(user);
+}
+
+function getCacheVisibility(req: Request, configuredVisibility: 'private' | 'public'): 'private' | 'public' {
+  return hasSensitiveRequestContext(req) ? 'private' : configuredVisibility;
+}
+
+function applyCacheHeaders(
+  req: Request,
+  res: Response,
+  ttl: number,
+  etag: string,
+  visibility: 'private' | 'public',
+  cacheStatus?: 'HIT' | 'MISS'
+): void {
+  const headers: Record<string, string> = {
+    'Cache-Control': `${getCacheVisibility(req, visibility)}, max-age=${ttl}`,
+    ETag: etag,
+    'Last-Modified': new Date().toUTCString(),
+    Vary: Array.from(new Set(CACHE_VARY_HEADERS)).join(', '),
+  };
+
+  if (cacheStatus) {
+    headers['X-Cache'] = cacheStatus;
+  }
+
+  res.set(headers);
 }
 
 /**
@@ -48,6 +85,7 @@ export function cacheMiddleware(options: CacheOptions = {}) {
     tags = [],
     methods = ['GET'],
     skipIf = () => false,
+    visibility = 'private',
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -61,24 +99,22 @@ export function cacheMiddleware(options: CacheOptions = {}) {
       return next();
     }
 
+    if (hasSensitiveRequestContext(req)) {
+      res.set('Vary', Array.from(new Set(CACHE_VARY_HEADERS)).join(', '));
+      return next();
+    }
+
     const cacheKey = generateCacheKey(req);
 
     // Intercept response
     const originalJson = res.json.bind(res);
-    let cachedData: any = null;
 
     res.json = function (data: any) {
-      cachedData = data;
-
       // Generate ETag
       const etag = generateETag(data);
 
       // Set cache headers
-      res.set({
-        'Cache-Control': `public, max-age=${ttl}`,
-        ETag: etag,
-        'Last-Modified': new Date().toUTCString(),
-      });
+      applyCacheHeaders(req, res, ttl, etag, visibility, 'MISS');
 
       // Check If-None-Match (ETag validation)
       const ifNoneMatch = req.headers['if-none-match'];
@@ -94,7 +130,6 @@ export function cacheMiddleware(options: CacheOptions = {}) {
           .catch((err) => logger.error('Error caching response', err));
       }
 
-      res.set('X-Cache', 'MISS');
       return originalJson(data);
     };
 
@@ -106,12 +141,7 @@ export function cacheMiddleware(options: CacheOptions = {}) {
         logger.debug(`Cache HIT for ${cacheKey}`);
 
         const etag = generateETag(cached);
-        res.set({
-          'Cache-Control': `public, max-age=${ttl}`,
-          ETag: etag,
-          'Last-Modified': new Date().toUTCString(),
-          'X-Cache': 'HIT',
-        });
+        applyCacheHeaders(req, res, ttl, etag, visibility, 'HIT');
 
         // Check If-None-Match (ETag validation)
         const ifNoneMatch = req.headers['if-none-match'];
@@ -120,7 +150,7 @@ export function cacheMiddleware(options: CacheOptions = {}) {
           return res.status(304).end();
         }
 
-        return res.json(cached);
+        return originalJson(cached);
       }
 
       next();
@@ -135,7 +165,7 @@ export function cacheMiddleware(options: CacheOptions = {}) {
  * Middleware to invalidate cache by tags
  */
 export function invalidateCacheByTags(...tags: string[]) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (_req: Request, res: Response, next: NextFunction) => {
     try {
       for (const tag of tags) {
         await cacheService.invalidateByTag(tag);
@@ -153,7 +183,7 @@ export function invalidateCacheByTags(...tags: string[]) {
  * Middleware to invalidate cache by pattern
  */
 export function invalidateCacheByPattern(pattern: string) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const deleted = await cacheService.deleteByPattern(pattern);
       logger.debug(`Invalidated cache pattern: ${pattern} (${deleted} keys)`);
@@ -170,9 +200,11 @@ export function invalidateCacheByPattern(pattern: string) {
  */
 export function setCacheHeaders(ttl: number = 3600) {
   return (req: Request, res: Response, next: NextFunction) => {
+    const visibility = getCacheVisibility(req, 'private');
     res.set({
-      'Cache-Control': `public, max-age=${ttl}`,
+      'Cache-Control': `${visibility}, max-age=${ttl}`,
       'Last-Modified': new Date().toUTCString(),
+      Vary: Array.from(new Set(CACHE_VARY_HEADERS)).join(', '),
     });
     next();
   };
@@ -181,7 +213,7 @@ export function setCacheHeaders(ttl: number = 3600) {
 /**
  * Middleware to prevent caching
  */
-export function noCacheMiddleware(req: Request, res: Response, next: NextFunction) {
+export function noCacheMiddleware(_req: Request, res: Response, next: NextFunction) {
   res.set({
     'Cache-Control': 'no-cache, no-store, must-revalidate',
     Pragma: 'no-cache',

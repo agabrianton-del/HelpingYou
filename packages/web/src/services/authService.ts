@@ -1,11 +1,22 @@
-import { User, AuthToken, RegisterData } from '../types';
+import { User, RegisterData } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
+async function parseJsonResponse<T>(response: Response): Promise<T> {
+  const payload = (await response.json()) as { data?: T };
+
+  if (payload.data === undefined) {
+    throw new Error('Malformed API response');
+  }
+
+  return payload.data;
+}
+
 class AuthService {
-  async login(email: string, password: string): Promise<AuthToken> {
+  async login(email: string, password: string): Promise<User> {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -16,13 +27,18 @@ class AuthService {
       throw new Error('Login failed');
     }
 
-    const data = await response.json();
-    return data.data;
+    const user = await this.getCurrentUser();
+    if (!user) {
+      throw new Error('Authenticated session was not established');
+    }
+
+    return user;
   }
 
-  async register(data: RegisterData): Promise<AuthToken> {
+  async register(data: RegisterData): Promise<User> {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -33,23 +49,45 @@ class AuthService {
       throw new Error('Registration failed');
     }
 
-    const result = await response.json();
-    return result.data;
+    const user = await this.getCurrentUser();
+    if (!user) {
+      throw new Error('Authenticated session was not established');
+    }
+
+    return user;
   }
 
-  async getCurrentUser(token: string): Promise<User> {
+  async getCurrentUser(): Promise<User | null> {
     const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      credentials: 'include',
       headers: {
-        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
       },
     });
+
+    if (response.status === 401) {
+      return null;
+    }
 
     if (!response.ok) {
       throw new Error('Failed to fetch user');
     }
 
-    const data = await response.json();
-    return data.data;
+    return parseJsonResponse<User>(response);
+  }
+
+  async logout(): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok && response.status !== 404 && response.status !== 405) {
+      throw new Error('Logout failed');
+    }
   }
 }
 

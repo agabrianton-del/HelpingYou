@@ -5,17 +5,20 @@ enum LogLevel {
   ERROR = 'ERROR',
 }
 
-class Logger {
+export class Logger {
   private env: string;
+  private context?: string;
 
-  constructor() {
+  constructor(context?: string) {
     this.env = process.env.NODE_ENV || 'development';
+    this.context = context;
   }
 
   private formatMessage(level: LogLevel, message: string, data?: any): string {
     const timestamp = new Date().toISOString();
     const dataStr = data ? ` ${JSON.stringify(data)}` : '';
-    return `[${timestamp}] [${level}] ${message}${dataStr}`;
+    const contextStr = this.context ? ` [${this.context}]` : '';
+    return `[${timestamp}] [${level}]${contextStr} ${message}${dataStr}`;
   }
 
   public debug(message: string, data?: any): void {

@@ -6,8 +6,8 @@ const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
@@ -29,7 +29,7 @@ const Header: React.FC = () => {
           {isAuthenticated ? (
             <>
               <span className="user-name">Hello, {user?.firstName}</span>
-              <button onClick={handleLogout} className="btn btn-secondary">
+              <button onClick={() => void handleLogout()} className="btn btn-secondary">
                 Logout
               </button>
             </>

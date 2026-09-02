@@ -5,7 +5,8 @@ export class ApiError extends Error {
   constructor(
     public statusCode: number,
     message: string,
-    public code: string = 'INTERNAL_ERROR'
+    public code: string = 'INTERNAL_ERROR',
+    public expose: boolean = statusCode < 500
   ) {
     super(message);
     Object.setPrototypeOf(this, ApiError.prototype);
@@ -16,14 +17,18 @@ export const errorHandler = (
   error: Error | ApiError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   const statusCode = error instanceof ApiError ? error.statusCode : 500;
   const code = error instanceof ApiError ? error.code : 'INTERNAL_ERROR';
-  const message = error.message || 'Internal Server Error';
+  const message =
+    error instanceof ApiError && error.expose
+      ? error.message
+      : 'Internal Server Error';
 
   logger.error(`Error [${statusCode}]:`, {
-    message,
+    clientMessage: message,
+    internalMessage: error.message || 'Internal Server Error',
     code,
     path: req.path,
     method: req.method,

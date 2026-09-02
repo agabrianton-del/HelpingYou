@@ -53,6 +53,8 @@
     "prepare": "husky install",
     "precommit": "lint-staged",
     "verify": "npm run lint && npm run type-check && npm run test",
+    "security:workflow-policy": "./scripts/check-workflow-security.sh",
+    "security:config-policy": "node ./scripts/validate-security-config.mjs",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",

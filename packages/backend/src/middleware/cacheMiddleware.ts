@@ -165,7 +165,7 @@ export function cacheMiddleware(options: CacheOptions = {}) {
  * Middleware to invalidate cache by tags
  */
 export function invalidateCacheByTags(...tags: string[]) {
-  return async (_req: Request, res: Response, next: NextFunction) => {
+  return async (_req: Request, _res: Response, next: NextFunction) => {
     try {
       for (const tag of tags) {
         await cacheService.invalidateByTag(tag);
@@ -183,7 +183,7 @@ export function invalidateCacheByTags(...tags: string[]) {
  * Middleware to invalidate cache by pattern
  */
 export function invalidateCacheByPattern(pattern: string) {
-  return async (_req: Request, res: Response, next: NextFunction) => {
+  return async (_req: Request, _res: Response, next: NextFunction) => {
     try {
       const deleted = await cacheService.deleteByPattern(pattern);
       logger.debug(`Invalidated cache pattern: ${pattern} (${deleted} keys)`);

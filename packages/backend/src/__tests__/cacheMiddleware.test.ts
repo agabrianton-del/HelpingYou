@@ -51,6 +51,7 @@ describe('cacheMiddleware', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCacheService.get.mockResolvedValue(null);
+    mockCacheService.set.mockResolvedValue(undefined);
   });
 
   it('bypasses cache access for authenticated requests', async () => {
@@ -76,14 +77,14 @@ describe('cacheMiddleware', () => {
     const res = createResponse();
     const next = jest.fn();
 
-    await cacheMiddleware()(req as never, res as never, next);
+    const result = await cacheMiddleware()(req as never, res as never, next);
 
     const xCacheValues = res.set.mock.calls
       .map(([value]: [{ 'X-Cache'?: string }]) => value?.['X-Cache'])
       .filter(Boolean);
 
     expect(next).not.toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith({ ok: true });
+    expect(result).toEqual({ ok: true });
     expect(xCacheValues).toEqual(['HIT']);
   });
 

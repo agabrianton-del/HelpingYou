@@ -17,7 +17,7 @@ while IFS= read -r line; do
     echo "Unpinned workflow action: $line" >&2
     invalid_uses=1
   fi
-done < <(grep -RIn '^[[:space:]]*uses:' "$workflow_dir" || true)
+done < <(grep -RIn '^[[:space:]]*uses:' "$workflow_dir" --exclude='*.md' || true)
 
 invalid_images=0
 while IFS= read -r line; do

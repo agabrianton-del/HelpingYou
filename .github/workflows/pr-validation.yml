@@ -219,27 +219,26 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request;
-
-            const summary = `
-## 📋 PR Summary
-
-- **Author:** @${pr.user.login}
-- **Base:** \`${pr.base.ref}\`
-- **Head:** \`${pr.head.ref}\`
-- **Changed Files:** ${pr.changed_files}
-- **Additions:** +${pr.additions}
-- **Deletions:** -${pr.deletions}
-
-## ✅ Checklist
-
-- [ ] Code follows style guidelines
-- [ ] Self-review completed
-- [ ] Comments added for complex logic
-- [ ] No new warnings generated
-- [ ] Tests added/updated
-- [ ] Documentation updated
-- [ ] No breaking changes
-            `;
+            const summary = [
+              '## 📋 PR Summary',
+              '',
+              `- **Author:** @${pr.user.login}`,
+              `- **Base:** \`${pr.base.ref}\``,
+              `- **Head:** \`${pr.head.ref}\``,
+              `- **Changed Files:** ${pr.changed_files}`,
+              `- **Additions:** +${pr.additions}`,
+              `- **Deletions:** -${pr.deletions}`,
+              '',
+              '## ✅ Checklist',
+              '',
+              '- [ ] Code follows style guidelines',
+              '- [ ] Self-review completed',
+              '- [ ] Comments added for complex logic',
+              '- [ ] No new warnings generated',
+              '- [ ] Tests added/updated',
+              '- [ ] Documentation updated',
+              '- [ ] No breaking changes',
+            ].join('\n');
 
             github.rest.issues.createComment({
               issue_number: pr.number,

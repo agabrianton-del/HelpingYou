@@ -192,7 +192,7 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request;
-            
+
             const summary = `
 ## 📋 PR Summary
 
@@ -213,7 +213,7 @@ jobs:
 - [ ] Documentation updated
 - [ ] No breaking changes
             `;
-            
+
             github.rest.issues.createComment({
               issue_number: pr.number,
               owner: context.repo.owner,

@@ -115,17 +115,25 @@ describe('CacheService', () => {
   describe('stats', () => {
     it('should track cache hits and misses', async () => {
       const key = 'test:stats';
+      const otherKey = 'test:stats:other';
       await cacheService.set(key, { data: 'test' });
 
       // Cache hit
       await cacheService.get(key);
       // Cache miss
-      await cacheService.get('non-existent');
+      await cacheService.get(key);
+      await cacheService.get(otherKey);
 
       const stats = cacheService.getStats(key) as any;
-      expect(stats.hits).toBeGreaterThan(0);
-      expect(stats.misses).toBeGreaterThan(0);
+      expect(stats.hits).toBe(2);
+      expect(stats.misses).toBe(0);
       expect(stats.hitRate).toBeGreaterThan(0);
+
+      expect(cacheService.getStats(otherKey)).toEqual({
+        hits: 0,
+        misses: 1,
+        hitRate: 0,
+      });
     });
   });
 

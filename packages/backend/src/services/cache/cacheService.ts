@@ -157,28 +157,18 @@ export class CacheService {
     return value;
   }
 
-  public getStats(_key: string): CacheStats | null {
-    const aggregated = Array.from(this.stats.values()).reduce(
-      (totals, currentStats) => {
-        totals.hits += currentStats.hits;
-        totals.misses += currentStats.misses;
-        return totals;
-      },
-      {
-        hits: 0,
-        misses: 0,
-      }
-    );
+  public getStats(key: string): CacheStats | null {
+    const stats = this.stats.get(key);
 
-    if (aggregated.hits === 0 && aggregated.misses === 0) {
+    if (!stats || (stats.hits === 0 && stats.misses === 0)) {
       return null;
     }
 
-    const total = aggregated.hits + aggregated.misses;
+    const total = stats.hits + stats.misses;
     return {
-      hits: aggregated.hits,
-      misses: aggregated.misses,
-      hitRate: total === 0 ? 0 : aggregated.hits / total,
+      hits: stats.hits,
+      misses: stats.misses,
+      hitRate: total === 0 ? 0 : stats.hits / total,
     };
   }
 

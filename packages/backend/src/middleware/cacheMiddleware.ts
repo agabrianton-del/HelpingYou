@@ -15,6 +15,10 @@ const logger = new Logger('CacheMiddleware');
 
 const CACHE_VARY_HEADERS = ['Authorization', 'Cookie'] as const;
 
+function applyVaryHeaders(res: Response): void {
+  res.vary(CACHE_VARY_HEADERS.join(', '));
+}
+
 /**
  * Generate cache key from request
  */
@@ -55,7 +59,6 @@ function applyCacheHeaders(
     'Cache-Control': `${getCacheVisibility(req, visibility)}, max-age=${ttl}`,
     ETag: etag,
     'Last-Modified': new Date().toUTCString(),
-    Vary: Array.from(new Set(CACHE_VARY_HEADERS)).join(', '),
   };
 
   if (cacheStatus) {
@@ -63,6 +66,7 @@ function applyCacheHeaders(
   }
 
   res.set(headers);
+  applyVaryHeaders(res);
 }
 
 /**
@@ -100,7 +104,7 @@ export function cacheMiddleware(options: CacheOptions = {}) {
     }
 
     if (hasSensitiveRequestContext(req)) {
-      res.set('Vary', Array.from(new Set(CACHE_VARY_HEADERS)).join(', '));
+      applyVaryHeaders(res);
       return next();
     }
 
@@ -137,7 +141,7 @@ export function cacheMiddleware(options: CacheOptions = {}) {
       // Try to get from cache
       const cached = await cacheService.get(cacheKey);
 
-      if (cached) {
+      if (cached !== null) {
         logger.debug(`Cache HIT for ${cacheKey}`);
 
         const etag = generateETag(cached);
@@ -204,8 +208,8 @@ export function setCacheHeaders(ttl: number = 3600) {
     res.set({
       'Cache-Control': `${visibility}, max-age=${ttl}`,
       'Last-Modified': new Date().toUTCString(),
-      Vary: Array.from(new Set(CACHE_VARY_HEADERS)).join(', '),
     });
+    applyVaryHeaders(res);
     next();
   };
 }

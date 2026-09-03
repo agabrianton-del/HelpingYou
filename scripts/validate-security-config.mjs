@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const repoRoot = resolve(new URL('..', import.meta.url).pathname);
+const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
 const dockerCompose = readFileSync(resolve(repoRoot, 'docker-compose.yml'), 'utf8');
 const envExample = readFileSync(resolve(repoRoot, '.env.example'), 'utf8');
@@ -53,19 +54,19 @@ for (const { file, pattern, message } of forbiddenPatterns) {
   }
 }
 
-if (!/mailhog:\n(?:.*\n)*?\s+profiles:\n(?:.*\n)*?\s+- tools/m.test(dockerCompose)) {
+if (!/^\s+mailhog:\n(?:.*\n)*?\s+profiles:\n(?:.*\n)*?\s+- tools/m.test(dockerCompose)) {
   failures.push('docker-compose.yml: mailhog must be isolated behind the tools profile.');
 }
 
-if (!/pgadmin:\n(?:.*\n)*?\s+profiles:\n(?:.*\n)*?\s+- tools/m.test(dockerCompose)) {
+if (!/^\s+pgadmin:\n(?:.*\n)*?\s+profiles:\n(?:.*\n)*?\s+- tools/m.test(dockerCompose)) {
   failures.push('docker-compose.yml: pgadmin must be isolated behind the tools profile.');
 }
 
-if (!/adminer:\n(?:.*\n)*?\s+profiles:\n(?:.*\n)*?\s+- tools/m.test(dockerCompose)) {
+if (!/^\s+adminer:\n(?:.*\n)*?\s+profiles:\n(?:.*\n)*?\s+- tools/m.test(dockerCompose)) {
   failures.push('docker-compose.yml: adminer must be isolated behind the tools profile.');
 }
 
-if (!/elasticsearch:\n(?:.*\n)*?\s+profiles:\n(?:.*\n)*?\s+- search/m.test(dockerCompose)) {
+if (!/^\s+elasticsearch:\n(?:.*\n)*?\s+profiles:\n(?:.*\n)*?\s+- search/m.test(dockerCompose)) {
   failures.push('docker-compose.yml: elasticsearch must be isolated behind the search profile.');
 }
 

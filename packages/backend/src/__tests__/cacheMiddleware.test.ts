@@ -37,6 +37,7 @@ function createResponse() {
 
   res.statusCode = 200;
   res.set = jest.fn().mockReturnValue(res);
+  res.vary = jest.fn().mockReturnValue(res);
   res.status = jest.fn().mockImplementation((code: number) => {
     res.statusCode = code;
     return res;
@@ -66,12 +67,12 @@ describe('cacheMiddleware', () => {
     await cacheMiddleware()(req as never, res as never, next);
 
     expect(mockCacheService.get).not.toHaveBeenCalled();
-    expect(res.set).toHaveBeenCalledWith('Vary', 'Authorization, Cookie');
+    expect(res.vary).toHaveBeenCalledWith('Authorization, Cookie');
     expect(next).toHaveBeenCalledTimes(1);
   });
 
   it('returns cached anonymous responses without downgrading the hit marker', async () => {
-    mockCacheService.get.mockResolvedValue({ ok: true });
+    mockCacheService.get.mockResolvedValue(false);
 
     const req = createRequest();
     const res = createResponse();
@@ -84,8 +85,9 @@ describe('cacheMiddleware', () => {
       .filter(Boolean);
 
     expect(next).not.toHaveBeenCalled();
-    expect(result).toEqual({ ok: true });
+    expect(result).toBe(false);
     expect(xCacheValues).toEqual(['HIT']);
+    expect(res.vary).toHaveBeenCalledWith('Authorization, Cookie');
   });
 
   it('marks cache misses as private and stores the response body', async () => {
@@ -110,10 +112,10 @@ describe('cacheMiddleware', () => {
     expect(cacheHeaderCall?.[0]).toEqual(
       expect.objectContaining({
         'Cache-Control': 'private, max-age=3600',
-        Vary: 'Authorization, Cookie',
         'X-Cache': 'MISS',
       })
     );
+    expect(res.vary).toHaveBeenCalledWith('Authorization, Cookie');
     expect(mockCacheService.set).toHaveBeenCalledTimes(1);
   });
 });
@@ -133,9 +135,9 @@ describe('setCacheHeaders', () => {
     expect(res.set).toHaveBeenCalledWith(
       expect.objectContaining({
         'Cache-Control': 'private, max-age=60',
-        Vary: 'Authorization, Cookie',
       })
     );
+    expect(res.vary).toHaveBeenCalledWith('Authorization, Cookie');
     expect(next).toHaveBeenCalledTimes(1);
   });
 });

@@ -245,6 +245,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     timeout-minutes: 40
+    env:
+      HAS_SNYK_TOKEN: ${{ secrets.SNYK_TOKEN != '' }}
     permissions:
       contents: read
       security-events: write
@@ -268,7 +270,7 @@ jobs:
         run: mkdir -p "${{ env.SECURITY_REPORTS_DIR }}"
 
       - name: Run Snyk (critical vulnerabilities)
-        if: ${{ secrets.SNYK_TOKEN != '' }}
+        if: ${{ env.HAS_SNYK_TOKEN == 'true' }}
         uses: snyk/actions/node@v1
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -276,7 +278,7 @@ jobs:
           args: --all-projects --severity-threshold=critical --json-file-output=${{ env.SECURITY_REPORTS_DIR }}/snyk-results.json
 
       - name: Snyk fallback when token is not configured
-        if: ${{ secrets.SNYK_TOKEN == '' }}
+        if: ${{ env.HAS_SNYK_TOKEN != 'true' }}
         run: echo "SNYK_TOKEN not configured. Skipping Snyk scan."
 
       - name: OWASP Dependency Check
@@ -405,6 +407,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     timeout-minutes: 25
+    env:
+      HAS_SONAR_TOKEN: ${{ secrets.SONAR_TOKEN != '' }}
 
     steps:
       - name: Checkout code
@@ -422,7 +426,7 @@ jobs:
         run: npm ci
 
       - name: Run SonarQube scan
-        if: ${{ secrets.SONAR_TOKEN != '' }}
+        if: ${{ env.HAS_SONAR_TOKEN == 'true' }}
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -433,7 +437,7 @@ jobs:
             -Dsonar.organization=helpingyou
 
       - name: SonarQube fallback when token is not configured
-        if: ${{ secrets.SONAR_TOKEN == '' }}
+        if: ${{ env.HAS_SONAR_TOKEN != 'true' }}
         run: echo "SONAR_TOKEN not configured. Skipping SonarQube scan."
 
   # ===================================
@@ -509,6 +513,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, test, integration-tests, build, security, code-quality, docker-build, deploy-staging, deploy-production]
     if: always()
+    env:
+      HAS_SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
 
     steps:
       - name: Determine status
@@ -521,7 +527,7 @@ jobs:
           fi
 
       - name: Send Slack notification
-        if: always() && secrets.SLACK_WEBHOOK_URL != ''
+        if: always() && env.HAS_SLACK_WEBHOOK_URL == 'true'
         uses: slackapi/slack-github-action@v4.0.0
         with:
           payload: |
@@ -541,5 +547,5 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Slack fallback when webhook is not configured
-        if: always() && secrets.SLACK_WEBHOOK_URL == ''
+        if: always() && env.HAS_SLACK_WEBHOOK_URL != 'true'
         run: echo "SLACK_WEBHOOK_URL not configured. Skipping Slack notification."

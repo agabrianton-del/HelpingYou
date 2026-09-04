@@ -8,7 +8,7 @@
 Una plataforma diseñada para ofrecer orientación, apoyo y acompañamiento de forma totalmente anónima, segura y accesible para cualquier persona que necesite ayuda.
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
-![License](https://img.shields.io/badge/license-AGPLv3-green)
+![License](https://img.shields.io/badge/license-Apache%202.0-green)
 ![Status](https://img.shields.io/badge/status-Development-orange)
 ![Platform](https://img.shields.io/badge/platform-Cross--Platform-blueviolet)
 ![Privacy](https://img.shields.io/badge/privacy-Anonymous-success)
@@ -285,21 +285,11 @@ El objetivo es construir una base sólida antes del lanzamiento de la primera ve
 
 # Licencia
 
-El código fuente de este proyecto se distribuye bajo la licencia **GNU Affero General Public License v3.0 (AGPLv3)**.
+Este proyecto se distribuye bajo la licencia **Apache License 2.0**.
+
+Esto permite utilizar, modificar y distribuir el software respetando los términos de dicha licencia.
 
 Consulta el archivo `LICENSE` para obtener más información.
-
-## Avisos legales
-
-- **Código:** AGPLv3.
-- **Marca:** “Tikkun” y su identidad visual están protegidas; su uso se rige por [TRADEMARKS.md](TRADEMARKS.md) y no se concede por la licencia del código.
-- **Contribuciones:** toda contribución requiere aceptación del [CLA](CLA.md).
-
-## Estrategia de doble licencia (futura)
-
-- La edición comunitaria pública seguirá bajo AGPLv3.
-- Los maintainers podrán ofrecer una licencia comercial separada para usos no compatibles con AGPLv3.
-- Esta posibilidad se sustenta en contribuciones recibidas bajo CLA, que autoriza relicenciamiento comercial futuro.
 
 ---
 

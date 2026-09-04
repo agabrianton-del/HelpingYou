@@ -98,7 +98,6 @@ Por favor marca que has completado lo siguiente:
 - [ ] No hay warnings nuevos generados por mis cambios
 - [ ] He eliminado código/comentarios debugueados
 - [ ] He verificado que no hay conflictos con main
-- [ ] He leído y aceptado el CLA del repositorio (`CLA.md`)
 
 ## ✅ Checklist Final
 
@@ -110,7 +109,6 @@ Por favor marca que has completado lo siguiente:
 - [ ] Changelog actualizado ✅
 - [ ] Documentación actualizada ✅
 - [ ] Code review completado ✅
-- [ ] Validación de CLA completada ✅
 
 ## 📦 Dependencias
 
@@ -144,4 +142,3 @@ Indica la prioridad de este PR:
 - Revisa el [CONTRIBUTING.md](https://github.com/agabrianton-del/HelpingYou/blob/main/CONTRIBUTING.md)
 - Sigue el [CODE_OF_CONDUCT.md](https://github.com/agabrianton-del/HelpingYou/blob/main/CODE_OF_CONDUCT.md)
 - Consulta la [ARCHITECTURE.md](https://github.com/agabrianton-del/HelpingYou/blob/main/ARCHITECTURE.md) para entender la estructura
-- El código se licencia bajo AGPLv3 y la marca “Tikkun” se rige por `TRADEMARKS.md`

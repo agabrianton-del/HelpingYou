@@ -1,0 +1,26 @@
+name: CLA Validation
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  statuses: write
+  issues: write
+
+jobs:
+  cla:
+    name: Check CLA signature
+    runs-on: ubuntu-latest
+    steps:
+      - name: CLA Assistant
+        uses: contributor-assistant/github-action@ca4a40a7d1004f18d9960b404b97e5f30a505a08 # v2.6.1
+        with:
+          path-to-signatures: .github/cla-signatures.json
+          path-to-document: https://github.com/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/CLA.md
+          branch: ${{ github.event.repository.default_branch }}
+          allowlist: dependabot[bot],github-actions[bot]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -54,7 +54,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/es/).
 - 📚 ARCHITECTURE.md - Arquitectura técnica
 - 📚 DEPLOYMENT.md - Guía de despliegue
 - 📚 API_DOCUMENTATION.md - Documentación de endpoints
-- 📚 LICENSE - Apache 2.0
+- 📚 LICENSE - AGPLv3
 
 ### Testing
 - ✨ Jest como framework de testing
@@ -346,7 +346,7 @@ En GitHub:
 
 ## Licencia
 
-Los cambios en este proyecto están bajo la licencia [Apache License 2.0](LICENSE).
+Los cambios en este proyecto están bajo la licencia [GNU AGPLv3](LICENSE).
 
 ---
 

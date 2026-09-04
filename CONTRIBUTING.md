@@ -15,6 +15,8 @@
 - [Pull Requests](#pull-requests)
 - [Reportar Bugs](#reportar-bugs)
 - [Sugerir Mejoras](#sugerir-mejoras)
+- [CLA (Acuerdo de Licencia de Contribución)](#cla-acuerdo-de-licencia-de-contribución)
+- [Licencia, Marca y Doble Licencia](#licencia-marca-y-doble-licencia)
 
 ## Código de Conducta
 
@@ -328,6 +330,7 @@ git commit -m "chore(deps): actualizar dependencias"
 5. El código está formateado: `npm run format`
 6. Has añadido/actualizado tests si es necesario
 7. Has documentado cambios importantes
+8. Has leído y aceptado el [CLA](CLA.md) (la validación automática del PR lo exige)
 
 ### Template de PR
 
@@ -364,6 +367,7 @@ Fixes #123
 - [ ] He actualizado la documentación
 - [ ] No hay cambios no intencionados
 - [ ] He considerado implicaciones de seguridad y privacidad
+- [ ] He aceptado el CLA del repositorio
 ```
 
 ### Proceso de Review
@@ -461,7 +465,10 @@ Información extra relevante.
 
 - [Documentación del Proyecto](./docs)
 - [Código de Conducta - Contributor Covenant v2.1](CODE_OF_CONDUCT.md)
-- [Licencia Apache 2.0](LICENSE)
+- [Licencia AGPLv3](LICENSE)
+- [Política de marca](TRADEMARKS.md)
+- [CLA](CLA.md)
+- [Estrategia de licenciamiento](LICENSING.md)
 - [Issues Abiertos](https://github.com/agabrianton-del/HelpingYou/issues)
 - [Discussiones](https://github.com/agabrianton-del/HelpingYou/discussions)
 - [Documentación Jest](https://jestjs.io/es/docs/getting-started)
@@ -481,4 +488,15 @@ Hecho con ❤️ por la comunidad HelpingYou
 
 ## Licencia
 
-Este proyecto está bajo la licencia [Apache License 2.0](LICENSE).
+Este proyecto está bajo la licencia [GNU AGPLv3](LICENSE).
+
+## CLA (Acuerdo de Licencia de Contribución)
+
+Todas las contribuciones de código o documentación deben aceptar el [CLA](CLA.md).
+El repositorio usa un bot de validación en PR para exigir esta aceptación antes del merge.
+
+## Licencia, Marca y Doble Licencia
+
+- El código del repositorio se publica bajo AGPLv3.
+- “Tikkun” y su identidad visual están protegidas por marca; consulta [TRADEMARKS.md](TRADEMARKS.md).
+- El CLA permite relicenciamiento futuro para habilitar una doble licencia comercial; ver [LICENSING.md](LICENSING.md).

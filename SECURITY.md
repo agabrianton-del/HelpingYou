@@ -269,7 +269,7 @@ Disponible bajo solicitud
 
 ## 12. Licencia
 
-Esta política de seguridad está bajo licencia [Apache License 2.0](LICENSE).
+Esta política de seguridad está bajo licencia [GNU AGPLv3](LICENSE).
 
 ---
 

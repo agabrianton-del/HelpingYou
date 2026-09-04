@@ -9,17 +9,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from the server-side session cookie
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          const userData = await authService.getCurrentUser(token);
+        const userData = await authService.getCurrentUser();
+        if (userData) {
           setUser(userData);
+        } else {
+          setUser(null);
         }
       } catch (err) {
-        localStorage.removeItem('authToken');
         setError('Failed to load user data');
       } finally {
         setIsLoading(false);
@@ -33,9 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     setError(null);
     try {
-      const response = await authService.login(email, password);
-      localStorage.setItem('authToken', response.accessToken);
-      const userData = await authService.getCurrentUser(response.accessToken);
+      const userData = await authService.login(email, password);
       setUser(userData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -45,19 +43,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('authToken');
-    setUser(null);
-    setError(null);
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } finally {
+      setUser(null);
+      setError(null);
+    }
   }, []);
 
   const register = useCallback(async (data: RegisterData) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await authService.register(data);
-      localStorage.setItem('authToken', response.accessToken);
-      const userData = await authService.getCurrentUser(response.accessToken);
+      const userData = await authService.register(data);
       setUser(userData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');

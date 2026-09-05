@@ -38,9 +38,9 @@ services:
         - >-
           printf '%s\n' "$${TEST_DATABASE_NAME}" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*$$' &&
           pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" &&
-          PGPASSWORD="$${POSTGRES_PASSWORD}" PGHOST=127.0.0.1
-          psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" -tAc
-          "SELECT 1 FROM pg_database WHERE datname = '$${TEST_DATABASE_NAME}'" | grep -q 1
+          printf "SELECT 1 FROM pg_database WHERE datname = :'test_db_name'\n" |
+          PGPASSWORD="$${POSTGRES_PASSWORD}" PGHOST=127.0.0.1 psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" -v test_db_name="$${TEST_DATABASE_NAME}" -tA |
+          grep -q 1
       interval: 5s
       timeout: 5s
       retries: 10

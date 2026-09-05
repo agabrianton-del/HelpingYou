@@ -46,8 +46,8 @@ until psql -U "$db_user" -d "$db_name" -c "SELECT 1" >/dev/null 2>&1; do
   sleep 1
 done
 
-if ! psql -U "$db_user" -d "$db_name" -tAc "SELECT 1 FROM pg_database WHERE datname = '$test_db_name'" | grep -q 1; then
-  psql -U "$db_user" -d "$db_name" -c "CREATE DATABASE \"$test_db_name\""
+if ! printf "SELECT 1 FROM pg_database WHERE datname = :'test_db_name'\n" | psql -U "$db_user" -d "$db_name" -v test_db_name="$test_db_name" -tA | grep -q 1; then
+  printf "SELECT format('CREATE DATABASE %%I', :'test_db_name') \\\\gexec\n" | psql -U "$db_user" -d "$db_name" -v test_db_name="$test_db_name"
 fi
 
 wait "$postgres_pid"

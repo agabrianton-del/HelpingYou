@@ -28,6 +28,10 @@ trap cleanup EXIT
 trap 'forward_and_wait' INT TERM
 
 until psql -U "$db_user" -d "$db_name" -c "SELECT 1" >/dev/null 2>&1; do
+  if ! kill -0 "$postgres_pid" 2>/dev/null; then
+    wait "$postgres_pid"
+    exit $?
+  fi
   sleep 1
 done
 

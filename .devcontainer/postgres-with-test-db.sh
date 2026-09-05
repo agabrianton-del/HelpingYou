@@ -4,7 +4,7 @@ export PGPASSWORD="${POSTGRES_PASSWORD:-postgres}"
 db_user="${POSTGRES_USER:-postgres}"
 db_name="${POSTGRES_DB:-helpingyou}"
 
-docker-entrypoint.sh postgres &
+docker-entrypoint.sh "$@" &
 postgres_pid=$!
 
 stop_postgres() {

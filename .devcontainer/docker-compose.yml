@@ -29,6 +29,7 @@ services:
     ports:
       - "5432:5432"
     entrypoint: ["/bin/sh", "/usr/local/bin/postgres-with-test-db.sh"]
+    command: ["postgres"]
     healthcheck:
       test:
         [

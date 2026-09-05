@@ -4,11 +4,20 @@ set -eu
 docker-entrypoint.sh postgres &
 postgres_pid=$!
 
-cleanup() {
+forward_and_wait() {
   kill "$postgres_pid" 2>/dev/null || true
+  wait "$postgres_pid"
 }
 
-trap cleanup INT TERM
+cleanup() {
+  if kill -0 "$postgres_pid" 2>/dev/null; then
+    kill "$postgres_pid" 2>/dev/null || true
+    wait "$postgres_pid" 2>/dev/null || true
+  fi
+}
+
+trap cleanup EXIT
+trap 'forward_and_wait' INT TERM
 
 until pg_isready -U postgres -d helpingyou >/dev/null 2>&1; do
   sleep 1

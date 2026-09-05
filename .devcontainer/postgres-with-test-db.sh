@@ -53,8 +53,10 @@ until psql -U "$db_user" -d "$db_name" -c "SELECT 1" >/dev/null 2>&1; do
 done
 
 if ! database_exists; then
-  if ! printf "SELECT format('CREATE DATABASE %%I', :'test_db_name') \\\\gexec\n" | psql -U "$db_user" -d "$db_name" -v test_db_name="$test_db_name"; then
-    database_exists
+  create_status=0
+  printf "SELECT format('CREATE DATABASE %%I', :'test_db_name') \\\\gexec\n" | psql -U "$db_user" -d "$db_name" -v test_db_name="$test_db_name" || create_status=$?
+  if [ "$create_status" -ne 0 ] && ! database_exists; then
+    exit "$create_status"
   fi
 fi
 

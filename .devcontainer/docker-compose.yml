@@ -42,6 +42,7 @@ services:
     restart: "no"
     environment:
       PGPASSWORD: postgres
+      PGHOST: 127.0.0.1
       POSTGRES_USER: postgres
       POSTGRES_DB: helpingyou
       TEST_DATABASE_NAME: ${TEST_DATABASE_NAME:-helpingyou_test}

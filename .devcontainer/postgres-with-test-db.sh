@@ -1,6 +1,8 @@
 #!/bin/sh
 set -eu
 export PGPASSWORD="${POSTGRES_PASSWORD:-postgres}"
+db_user="${POSTGRES_USER:-postgres}"
+db_name="${POSTGRES_DB:-helpingyou}"
 
 docker-entrypoint.sh postgres &
 postgres_pid=$!
@@ -20,12 +22,12 @@ cleanup() {
 trap cleanup EXIT
 trap 'forward_and_wait' INT TERM
 
-until psql -U postgres -d postgres -c "SELECT 1" >/dev/null 2>&1; do
+until psql -U "$db_user" -d "$db_name" -c "SELECT 1" >/dev/null 2>&1; do
   sleep 1
 done
 
-if ! psql -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'helpingyou_test'" | grep -q 1; then
-  psql -U postgres -d postgres -c "CREATE DATABASE helpingyou_test"
+if ! psql -U "$db_user" -d "$db_name" -tAc "SELECT 1 FROM pg_database WHERE datname = 'helpingyou_test'" | grep -q 1; then
+  psql -U "$db_user" -d "$db_name" -c "CREATE DATABASE helpingyou_test"
 fi
 
 wait "$postgres_pid"

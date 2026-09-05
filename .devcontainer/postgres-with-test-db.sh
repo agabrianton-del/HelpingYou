@@ -7,8 +7,8 @@ db_name="${POSTGRES_DB:-helpingyou}"
 test_db_name="${TEST_DATABASE_NAME:-helpingyou_test}"
 
 case "$test_db_name" in
-  ''|*[!A-Za-z0-9_]*)
-    echo "Invalid TEST_DATABASE_NAME: use only letters, numbers, and underscores." >&2
+  ''|[!A-Za-z_]*|*[!A-Za-z0-9_]*)
+    echo "Invalid TEST_DATABASE_NAME: use a PostgreSQL identifier with letters or underscores, followed by letters, numbers, or underscores." >&2
     exit 1
     ;;
 esac

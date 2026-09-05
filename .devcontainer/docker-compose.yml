@@ -34,10 +34,13 @@ services:
     command: ["postgres"]
     healthcheck:
       test:
-        [
-          "CMD-SHELL",
-          'case "$${TEST_DATABASE_NAME}" in (""|*[!A-Za-z0-9_]*) exit 1 ;; esac; pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" && PGPASSWORD="$${POSTGRES_PASSWORD}" PGHOST=127.0.0.1 psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" -tAc "SELECT 1 FROM pg_database WHERE datname = ''$${TEST_DATABASE_NAME}''" | grep -q 1'
-        ]
+        - CMD-SHELL
+        - >-
+          case "$${TEST_DATABASE_NAME}" in (""|[!A-Za-z_]*|*[!A-Za-z0-9_]*) exit 1 ;; esac;
+          pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" &&
+          PGPASSWORD="$${POSTGRES_PASSWORD}" PGHOST=127.0.0.1
+          psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" -tAc
+          "SELECT 1 FROM pg_database WHERE datname = '$${TEST_DATABASE_NAME}'" | grep -q 1
       interval: 5s
       timeout: 5s
       retries: 10

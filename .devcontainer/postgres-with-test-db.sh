@@ -4,6 +4,7 @@ export PGPASSWORD="${POSTGRES_PASSWORD:-postgres}"
 export PGHOST="${PGHOST:-127.0.0.1}"
 db_user="${POSTGRES_USER:-postgres}"
 db_name="${POSTGRES_DB:-helpingyou}"
+test_db_name="${TEST_DATABASE_NAME:-helpingyou_test}"
 
 docker-entrypoint.sh "$@" &
 postgres_pid=$!
@@ -40,8 +41,8 @@ until psql -U "$db_user" -d "$db_name" -c "SELECT 1" >/dev/null 2>&1; do
   sleep 1
 done
 
-if ! psql -U "$db_user" -d "$db_name" -tAc "SELECT 1 FROM pg_database WHERE datname = 'helpingyou_test'" | grep -q 1; then
-  psql -U "$db_user" -d "$db_name" -c "CREATE DATABASE helpingyou_test"
+if ! psql -U "$db_user" -d "$db_name" -tAc "SELECT 1 FROM pg_database WHERE datname = '$test_db_name'" | grep -q 1; then
+  psql -U "$db_user" -d "$db_name" -c "CREATE DATABASE \"$test_db_name\""
 fi
 
 wait "$postgres_pid"

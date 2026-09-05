@@ -6,6 +6,13 @@ db_user="${POSTGRES_USER:-postgres}"
 db_name="${POSTGRES_DB:-helpingyou}"
 test_db_name="${TEST_DATABASE_NAME:-helpingyou_test}"
 
+case "$test_db_name" in
+  ''|*[!A-Za-z0-9_]*)
+    echo "Invalid TEST_DATABASE_NAME: use only letters, numbers, and underscores." >&2
+    exit 1
+    ;;
+esac
+
 docker-entrypoint.sh "$@" &
 postgres_pid=$!
 

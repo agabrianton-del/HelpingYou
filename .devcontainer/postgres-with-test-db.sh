@@ -11,6 +11,12 @@ if ! printf '%s\n' "$test_db_name" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*$'; then
   exit 1
 fi
 
+database_exists() {
+  printf "SELECT 1 FROM pg_database WHERE datname = :'test_db_name'\n" |
+    psql -U "$db_user" -d "$db_name" -v test_db_name="$test_db_name" -tA |
+    grep -q 1
+}
+
 docker-entrypoint.sh "$@" &
 postgres_pid=$!
 
@@ -46,8 +52,10 @@ until psql -U "$db_user" -d "$db_name" -c "SELECT 1" >/dev/null 2>&1; do
   sleep 1
 done
 
-if ! printf "SELECT 1 FROM pg_database WHERE datname = :'test_db_name'\n" | psql -U "$db_user" -d "$db_name" -v test_db_name="$test_db_name" -tA | grep -q 1; then
-  printf "SELECT format('CREATE DATABASE %%I', :'test_db_name') \\\\gexec\n" | psql -U "$db_user" -d "$db_name" -v test_db_name="$test_db_name"
+if ! database_exists; then
+  if ! printf "SELECT format('CREATE DATABASE %%I', :'test_db_name') \\\\gexec\n" | psql -U "$db_user" -d "$db_name" -v test_db_name="$test_db_name"; then
+    database_exists
+  fi
 fi
 
 wait "$postgres_pid"

@@ -36,7 +36,7 @@ services:
       test:
         - CMD-SHELL
         - >-
-          case "$${TEST_DATABASE_NAME}" in (""|[!A-Za-z_]*|*[!A-Za-z0-9_]*) exit 1 ;; esac;
+          printf '%s\n' "$${TEST_DATABASE_NAME}" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*$$' &&
           pg_isready -h 127.0.0.1 -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" &&
           PGPASSWORD="$${POSTGRES_PASSWORD}" PGHOST=127.0.0.1
           psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" -tAc

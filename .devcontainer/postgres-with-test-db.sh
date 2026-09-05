@@ -6,12 +6,10 @@ db_user="${POSTGRES_USER:-postgres}"
 db_name="${POSTGRES_DB:-helpingyou}"
 test_db_name="${TEST_DATABASE_NAME:-helpingyou_test}"
 
-case "$test_db_name" in
-  ''|[!A-Za-z_]*|*[!A-Za-z0-9_]*)
-    echo "Invalid TEST_DATABASE_NAME: use a PostgreSQL identifier with letters or underscores, followed by letters, numbers, or underscores." >&2
-    exit 1
-    ;;
-esac
+if ! printf '%s\n' "$test_db_name" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*$'; then
+  echo "Invalid TEST_DATABASE_NAME: use a PostgreSQL identifier with letters or underscores, followed by letters, numbers, or underscores." >&2
+  exit 1
+fi
 
 docker-entrypoint.sh "$@" &
 postgres_pid=$!

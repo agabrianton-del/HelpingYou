@@ -1,21 +1,17 @@
 {
   "name": "HelpingYou Development",
-
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "backend",
   "workspaceFolder": "/workspaces/HelpingYou",
-
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-
   "forwardPorts": [
     3000,
-    3001,
+    5173,
     5432,
     6379
   ],
-
   "portsAttributes": {
     "3000": {
       "label": "HelpingYou Web"
@@ -30,9 +26,7 @@
       "label": "Redis"
     }
   },
-
   "postCreateCommand": "npm ci",
-
   "customizations": {
     "vscode": {
       "extensions": [
@@ -53,6 +47,5 @@
       }
     }
   },
-
   "remoteUser": "node"
 }

@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
 export PGPASSWORD="${POSTGRES_PASSWORD:-postgres}"
+export PGHOST="${PGHOST:-127.0.0.1}"
 db_user="${POSTGRES_USER:-postgres}"
 db_name="${POSTGRES_DB:-helpingyou}"
 

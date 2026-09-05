@@ -14,7 +14,11 @@ stop_postgres() {
 
 forward_and_wait() {
   stop_postgres
+  set +e
   wait "$postgres_pid"
+  status=$?
+  set -e
+  exit "$status"
 }
 
 cleanup() {

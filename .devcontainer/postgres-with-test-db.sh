@@ -7,14 +7,19 @@ db_name="${POSTGRES_DB:-helpingyou}"
 docker-entrypoint.sh postgres &
 postgres_pid=$!
 
-forward_and_wait() {
+stop_postgres() {
+  pg_ctl -D "${PGDATA:-/var/lib/postgresql/data}" -m fast stop >/dev/null 2>&1 || true
   kill "$postgres_pid" 2>/dev/null || true
+}
+
+forward_and_wait() {
+  stop_postgres
   wait "$postgres_pid"
 }
 
 cleanup() {
   if kill -0 "$postgres_pid" 2>/dev/null; then
-    kill "$postgres_pid" 2>/dev/null || true
+    stop_postgres
     wait "$postgres_pid" 2>/dev/null || true
   fi
 }

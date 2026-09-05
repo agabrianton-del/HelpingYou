@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+export PGPASSWORD="${POSTGRES_PASSWORD:-postgres}"
 
 docker-entrypoint.sh postgres &
 postgres_pid=$!

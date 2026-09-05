@@ -19,7 +19,7 @@ cleanup() {
 trap cleanup EXIT
 trap 'forward_and_wait' INT TERM
 
-until pg_isready -U postgres -d helpingyou >/dev/null 2>&1; do
+until psql -U postgres -d postgres -c "SELECT 1" >/dev/null 2>&1; do
   sleep 1
 done
 

@@ -7,10 +7,10 @@ services:
     container_name: helpingyou-postgres
     environment:
       POSTGRES_USER: ${DB_USER:-helpingyou}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in your environment}
       POSTGRES_DB: ${DB_NAME:-helpingyou_dev}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -27,7 +27,7 @@ services:
     image: redis:7-alpine
     container_name: helpingyou-redis
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -45,10 +45,10 @@ services:
     container_name: helpingyou-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-password}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?Set MONGO_PASSWORD in your environment}
       MONGO_INITDB_DATABASE: ${MONGO_DB:-helpingyou_dev}
     ports:
-      - "${MONGO_PORT:-27017}:27017"
+      - "127.0.0.1:${MONGO_PORT:-27017}:27017"
     volumes:
       - mongo_data:/data/db
       - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/init.js
@@ -64,12 +64,14 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
     container_name: helpingyou-elasticsearch
+    profiles:
+      - search
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false
+      - xpack.security.enabled=${ELASTICSEARCH_SECURITY_ENABLED:-false}
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ports:
-      - "${ES_PORT:-9200}:9200"
+      - "127.0.0.1:${ES_PORT:-9200}:9200"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
@@ -92,15 +94,15 @@ services:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER:-helpingyou}
-      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in your environment}
       DB_NAME: ${DB_NAME:-helpingyou_dev}
       REDIS_URL: redis://redis:6379
-      MONGO_URL: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-helpingyou_dev}?authSource=admin
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
+      MONGO_URL: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:?Set MONGO_PASSWORD in your environment}@mongodb:27017/${MONGO_DB:-helpingyou_dev}?authSource=admin
+      ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elasticsearch:9200}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in your environment}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
     ports:
-      - "${BACKEND_PORT:-3000}:3000"
+      - "127.0.0.1:${BACKEND_PORT:-3000}:3000"
     volumes:
       - ./packages/backend/src:/app/packages/backend/src
       - ./packages/shared/src:/app/packages/shared/src
@@ -115,6 +117,10 @@ services:
         condition: service_healthy
     networks:
       - helpingyou-network
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     command: npm run dev
 
   # Frontend Web (Development)
@@ -127,7 +133,7 @@ services:
       VITE_API_URL: http://localhost:3000
       VITE_WEBSOCKET_URL: ws://localhost:3000
     ports:
-      - "${WEB_PORT:-5173}:5173"
+      - "127.0.0.1:${WEB_PORT:-5173}:5173"
     volumes:
       - ./packages/web/src:/app/packages/web/src
       - ./packages/web/public:/app/packages/web/public
@@ -146,9 +152,11 @@ services:
   mailhog:
     image: mailhog/mailhog:latest
     container_name: helpingyou-mailhog
+    profiles:
+      - tools
     ports:
-      - "${MAILHOG_PORT:-1025}:1025"
-      - "${MAILHOG_UI_PORT:-8025}:8025"
+      - "127.0.0.1:${MAILHOG_PORT:-1025}:1025"
+      - "127.0.0.1:${MAILHOG_UI_PORT:-8025}:8025"
     networks:
       - helpingyou-network
 
@@ -156,11 +164,13 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: helpingyou-pgadmin
+    profiles:
+      - tools
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@helpingyou.local}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-password}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?Set PGADMIN_PASSWORD in your environment}
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      - "127.0.0.1:${PGADMIN_PORT:-5050}:80"
     depends_on:
       - postgres
     networks:
@@ -170,8 +180,10 @@ services:
   adminer:
     image: adminer:latest
     container_name: helpingyou-adminer
+    profiles:
+      - tools
     ports:
-      - "${ADMINER_PORT:-8080}:8080"
+      - "127.0.0.1:${ADMINER_PORT:-8080}:8080"
     depends_on:
       - postgres
       - mongodb

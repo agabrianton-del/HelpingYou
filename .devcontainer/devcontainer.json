@@ -14,10 +14,10 @@
   ],
   "portsAttributes": {
     "3000": {
-      "label": "HelpingYou Web"
-    },
-    "3001": {
       "label": "HelpingYou Backend API"
+    },
+    "5173": {
+      "label": "HelpingYou Web"
     },
     "5432": {
       "label": "PostgreSQL"

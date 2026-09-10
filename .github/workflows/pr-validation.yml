@@ -209,7 +209,6 @@ jobs:
   pr-summary:
     name: Generate PR Summary
     runs-on: ubuntu-latest
-    if: github.event.action == 'opened'
     permissions:
       contents: read
       issues: write
@@ -219,7 +218,9 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request;
+            const summaryMarker = '<!-- helpingyou-pr-summary -->';
             const summary = [
+              summaryMarker,
               '## 📋 PR Summary',
               '',
               `- **Author:** @${pr.user.login}`,
@@ -240,9 +241,30 @@ jobs:
               '- [ ] No breaking changes',
             ].join('\n');
 
-            github.rest.issues.createComment({
+            const { data: comments } = await github.rest.issues.listComments({
               issue_number: pr.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: summary
+              per_page: 100
             });
+
+            const existingSummaryComment = comments.find(comment =>
+              comment.user?.login === 'github-actions[bot]' &&
+              comment.body?.includes(summaryMarker)
+            );
+
+            if (existingSummaryComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingSummaryComment.id,
+                body: summary
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: pr.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: summary
+              });
+            }

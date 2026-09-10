@@ -219,7 +219,9 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
             const summaryHeader = '## 📋 PR Summary';
+            const summaryMarker = '<!-- helpingyou-pr-summary -->';
             const summary = [
+              summaryMarker,
               summaryHeader,
               '',
               `- **Author:** @${pr.user.login}`,
@@ -248,8 +250,8 @@ jobs:
             });
 
             const existingSummary = comments.find((comment) =>
-              comment.user?.type === 'Bot' &&
-              comment.body?.startsWith(summaryHeader)
+              comment.user?.login === 'github-actions[bot]' &&
+              comment.body?.includes(summaryMarker)
             );
 
             if (existingSummary) {

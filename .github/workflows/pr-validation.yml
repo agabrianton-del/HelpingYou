@@ -162,6 +162,7 @@ jobs:
           exclude: |
             .git
             .github
+            **/*.md
             node_modules
             dist
             build

@@ -34,6 +34,7 @@ jobs:
     permissions:
       contents: read
       issues: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -213,6 +214,7 @@ jobs:
     permissions:
       contents: read
       issues: write
+      pull-requests: write
     steps:
       - name: Create PR summary
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7

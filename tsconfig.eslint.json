@@ -8,6 +8,7 @@
     "src",
     "__mocks__",
     "jest.config.js",
+    "packages/*/jest.config.js",
     "jest.setup.js",
     "jest.setup.frontend.js",
     "packages/*/src",

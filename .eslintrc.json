@@ -147,9 +147,6 @@
   "overrides": [
     {
       "files": ["__mocks__/**/*.js", "*.config.js", ".eslintrc.js"],
-      "parserOptions": {
-        "project": null
-      },
       "extends": ["eslint:recommended"]
     },
     {

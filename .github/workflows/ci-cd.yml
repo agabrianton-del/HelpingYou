@@ -79,10 +79,12 @@ jobs:
                 per_page: 100,
               });
 
-              runCodeJobs = files.some(
-                ({ filename }) =>
-                  !docsOnlyPatterns.some((pattern) => pattern.test(filename))
-              );
+              if (files.length > 0) {
+                runCodeJobs = files.some(
+                  ({ filename }) =>
+                    !docsOnlyPatterns.some((pattern) => pattern.test(filename))
+                );
+              }
             }
 
             core.setOutput('run_code_jobs', String(runCodeJobs));

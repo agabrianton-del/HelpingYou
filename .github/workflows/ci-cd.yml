@@ -93,7 +93,7 @@ jobs:
   lint:
     name: Lint & Format
     needs: [workflow-security, changes]
-    if: needs.changes.outputs.run_code_jobs == 'true'
+    if: github.event_name == 'push' || needs.changes.outputs.run_code_jobs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -129,7 +129,7 @@ jobs:
   test:
     name: Unit Tests
     needs: [workflow-security, changes]
-    if: needs.changes.outputs.run_code_jobs == 'true'
+    if: github.event_name == 'push' || needs.changes.outputs.run_code_jobs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -197,7 +197,7 @@ jobs:
     needs: [workflow-security, changes]
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: needs.changes.outputs.run_code_jobs == 'true' && (github.event_name == 'push' || github.event.pull_request.draft == false)
+    if: (github.event_name == 'push' || needs.changes.outputs.run_code_jobs == 'true') && (github.event_name == 'push' || github.event.pull_request.draft == false)
 
     services:
       postgres:

@@ -1,0 +1,20 @@
+[default]
+extend-ignore-identifiers-re = []
+
+[files]
+extend-exclude = [
+    "*.md",          # si tu documentación es enteramente en español, lo más simple es excluir todo el markdown
+]
+
+[default.extend-words]
+# O bien, si quieres que typos siga revisando código pero no marque estas palabras en español:
+ser = "ser"
+cliente = "cliente"
+componentes = "componentes"
+reportes = "reportes"
+accesible = "accesible"
+versiones = "versiones"
+dependencias = "dependencias"
+principales = "principales"
+problemas = "problemas"
+ofrecer = "ofrecer"

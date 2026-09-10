@@ -62,23 +62,21 @@ class AppServer {
     this.app.use(requestLogger);
 
     // Health check endpoint
-    this.app.get('/health', (req: ExpressRequest, res: ExpressResponse) => {
+    this.app.get('/health', (_req: ExpressRequest, res: ExpressResponse) => {
       res.status(200).json({
         status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        environment: this.env,
       });
     });
   }
 
   private initializeRoutes(): void {
     // API routes will be added here
-    this.app.get('/api', (req: ExpressRequest, res: ExpressResponse) => {
+    this.app.get('/api', (_req: ExpressRequest, res: ExpressResponse) => {
       res.status(200).json({
         message: 'Welcome to HelpingYou API',
         version: '1.0.0',
-        environment: this.env,
       });
     });
   }

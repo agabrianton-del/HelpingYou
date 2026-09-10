@@ -39,6 +39,7 @@
     "test": "lerna run test --parallel",
     "test:watch": "lerna run test:watch --parallel",
     "test:coverage": "lerna run test:coverage --parallel",
+    "test:cov": "lerna run test:coverage --parallel",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
@@ -52,6 +53,8 @@
     "prepare": "husky install",
     "precommit": "lint-staged",
     "verify": "npm run lint && npm run type-check && npm run test",
+    "security:workflow-policy": "./scripts/check-workflow-security.sh",
+    "security:config-policy": "node ./scripts/validate-security-config.mjs",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
@@ -71,8 +74,10 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-native": "^5.0.0",
     "eslint-plugin-regexp": "^2.10.0",
     "husky": "^8.0.3",
     "jest": "^29.7.0",
@@ -98,5 +103,8 @@
     "**/*.{json,md,yaml,yml}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "socket.io": "^4.8.3"
   }
 }

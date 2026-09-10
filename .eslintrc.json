@@ -150,7 +150,10 @@
       "parserOptions": {
         "project": null
       },
-      "extends": ["eslint:recommended"]
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/disable-type-checked"
+      ]
     },
     {
       "files": ["*.test.ts", "*.test.tsx", "*.spec.ts", "*.spec.tsx"],

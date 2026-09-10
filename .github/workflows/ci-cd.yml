@@ -50,11 +50,52 @@ jobs:
       - name: Validate repository security configuration
         run: npm run security:config-policy
 
+  changes:
+    name: Detect Code-Impacting Changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      run_code_jobs: ${{ steps.classify.outputs.run_code_jobs }}
+
+    steps:
+      - name: Classify changed files
+        id: classify
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const docsOnlyPatterns = [
+              /^\.typos\.toml$/,
+              /^(?:.+\/)?[^/]+\.(?:md|mdx|markdown)$/i,
+            ];
+            let runCodeJobs = true;
+
+            if (context.eventName === 'pull_request') {
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                per_page: 100,
+              });
+
+              if (files.length > 0) {
+                runCodeJobs = files.some(
+                  ({ filename }) =>
+                    !docsOnlyPatterns.some((pattern) => pattern.test(filename))
+                );
+              }
+            }
+
+            core.setOutput('run_code_jobs', String(runCodeJobs));
+
   # ===================================
   # LINT & FORMAT CHECK
   # ===================================
   lint:
     name: Lint & Format
+    needs: [workflow-security, changes]
+    if: github.event_name == 'push' || needs.changes.outputs.run_code_jobs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -89,6 +130,8 @@ jobs:
   # ===================================
   test:
     name: Unit Tests
+    needs: [workflow-security, changes]
+    if: github.event_name == 'push' || needs.changes.outputs.run_code_jobs == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -153,9 +196,10 @@ jobs:
   # ===================================
   integration-tests:
     name: Integration Tests
+    needs: [workflow-security, changes]
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    if: (github.event_name == 'push' || needs.changes.outputs.run_code_jobs == 'true') && (github.event_name == 'push' || github.event.pull_request.draft == false)
 
     services:
       postgres:

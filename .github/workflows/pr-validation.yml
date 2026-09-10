@@ -167,6 +167,7 @@ jobs:
             dist
             build
             coverage
+            **/*.md
 
   commit-lint:
     name: Lint Commit Messages
